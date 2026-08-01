@@ -8,5 +8,5 @@ export const authOptions = {
     }),
   ],
   trustHost: true,
-  session: { strategy: "jwt" },
+  session: { strategy: "jwt" as const },
 };
