@@ -1,4 +1,3 @@
-import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
 export const authOptions = {
@@ -11,5 +10,3 @@ export const authOptions = {
   trustHost: true,
   session: { strategy: "jwt" },
 };
-
-export default NextAuth(authOptions);
