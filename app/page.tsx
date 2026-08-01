@@ -2,8 +2,21 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth";
 import Link from "next/link";
 
+export const metadata = {
+  title: "AI Scan Backend",
+  description: "Backend for AI content detection",
+};
+
 export default async function Home() {
-  const session = await getServerSession(authOptions);
+  let session = null;
+
+  if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
+    try {
+      session = await getServerSession(authOptions);
+    } catch {
+      // Auth not configured yet — show sign-in form anyway
+    }
+  }
 
   return (
     <main style={{ padding: 40, fontFamily: "system-ui, sans-serif" }}>

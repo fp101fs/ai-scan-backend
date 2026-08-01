@@ -1,10 +1,22 @@
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../auth";
+import { authOptions } from "../auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
+export const metadata = {
+  title: "Dashboard - AI Scan Backend",
+};
+
 export default async function Dashboard() {
-  const session = await getServerSession(authOptions);
+  let session = null;
+
+  if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
+    try {
+      session = await getServerSession(authOptions);
+    } catch {
+      // Auth not configured yet
+    }
+  }
 
   if (!session?.user) {
     redirect("/");
