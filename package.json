@@ -18,5 +18,10 @@
     "next-auth": "^4.24.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.18",
+    "typescript": "^7.0.2"
   }
 }
