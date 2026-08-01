@@ -1,7 +1,9 @@
-import { auth, signIn, signOut } from "@/auth";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
+import Link from "next/link";
 
 export default async function Home() {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
 
   return (
     <main style={{ padding: 40, fontFamily: "system-ui, sans-serif" }}>
@@ -11,12 +13,13 @@ export default async function Home() {
         <>
           <p>Signed in as {session.user.name}</p>
           <p>
-            <a href="/dashboard">Go to Dashboard →</a>
+            <Link href="/dashboard">Go to Dashboard →</Link>
           </p>
           <form
             action={async () => {
               "use server";
-              await signOut({ redirectTo: "/" });
+              const { signOut } = await import("next-auth/react");
+              await signOut({ callbackUrl: "/" });
             }}
           >
             <button type="submit">Sign out</button>
@@ -26,7 +29,8 @@ export default async function Home() {
         <form
           action={async () => {
             "use server";
-            await signIn("google", { redirectTo: "/dashboard" });
+            const { signIn } = await import("next-auth/react");
+            await signIn("google", { callbackUrl: "/dashboard" });
           }}
         >
           <button type="submit">Sign in with Google</button>

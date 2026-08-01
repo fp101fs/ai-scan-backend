@@ -1,8 +1,10 @@
-import { auth } from "@/auth";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 export default async function Dashboard() {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
 
   if (!session?.user) {
     redirect("/");
@@ -14,7 +16,7 @@ export default async function Dashboard() {
       <p>Welcome, {session.user.name}!</p>
       <p>Email: {session.user.email}</p>
       <p>
-        <a href="/">← Home</a>
+        <Link href="/">← Home</Link>
       </p>
     </main>
   );
