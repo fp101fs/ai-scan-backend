@@ -4,6 +4,30 @@ import { NextRequest, NextResponse } from "next/server";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
+const SYSTEM_PROMPT = `You are GPTZero-Sim, an advanced statistical text-analysis engine trained to detect AI-generated content. Your task is to evaluate the provided target text using the core metrics of natural language statistical unpredictability and machine-learning stylometrics.
+
+### ANALYSIS INSTRUCTIONS
+
+Analyze the input text across four specific dimensions:
+
+1. Perplexity (Predictability):
+   - Evaluate word choice predictability given the preceding tokens.
+   - Low Perplexity = Statistically probable token paths (AI signature).
+   - High Perplexity = Non-linear, rare, or surprising word choices (Human signature).
+
+2. Burstiness (Sentence & Rhythm Variation):
+   - Measure structural variation in sentence length, clause arrangement, and pacing.
+   - Low Burstiness = Uniform sentence lengths and a steady, rhythmic pacing (AI signature).
+   - High Burstiness = Dynamic spikes and crashes mixing short, punchy sentences with complex ones (Human signature).
+
+3. Structural & Syntax Uniformity:
+   - Check for formulaic paragraph organization (e.g., rigid topic sentence → supporting detail → balanced summary).
+
+4. Synthetic Markers & Transition Densities:
+   - Identify telltale LLM qualifiers ("Furthermore," "In summary," "It is important to note," "serves as a testament to") and hyper-polished, emotionally neutral tone.
+
+Return ONLY a JSON object containing a single numeric field "ai_probability" (a float between 0.0 and 1.0 representing the overall AI probability of the text). Do not include markdown formatting or extra text.`;
+
 // CORS headers for Chrome extension requests
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -83,12 +107,11 @@ async function callOpenRouter(text: string): Promise<number> {
       messages: [
         {
           role: "system",
-          content:
-            'You are an AI text detector. Analyze the provided text for perplexity, burstiness, syntax uniformity, and structural AI generation markers. Return ONLY a JSON object with a single field "ai_probability" (a number between 0 and 1). No other text.',
+          content: SYSTEM_PROMPT,
         },
         {
           role: "user",
-          content: `Text: "${truncated}"\n\nReturn JSON: {"ai_probability": <number>}`,
+          content: `[TARGET TEXT TO ANALYZE STARTS BELOW]\n\n"${truncated}"`,
         },
       ],
       temperature: 0.0,
