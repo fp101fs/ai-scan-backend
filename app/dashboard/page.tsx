@@ -62,7 +62,14 @@ const recentScans: ScanRecord[] = [
 ]
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions)
+  let session = null
+  if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
+    try {
+      session = await getServerSession(authOptions)
+    } catch {
+      session = null
+    }
+  }
 
   if (!session) {
     redirect('/')
@@ -80,6 +87,9 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
+          <Link href="/scan" className="btn btn-secondary">
+            Web Scanner
+          </Link>
           <Link href="/settings" className="btn btn-secondary">
             Settings
           </Link>
@@ -148,11 +158,11 @@ export default async function DashboardPage() {
           Quick Actions
         </h2>
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-          <Link href="/settings" className="btn btn-primary">
-            Configure API Settings
+          <Link href="/scan" className="btn btn-primary">
+            Launch Text Scanner
           </Link>
-          <Link href="/" className="btn btn-secondary">
-            View Documentation
+          <Link href="/settings" className="btn btn-secondary">
+            Configure API Settings
           </Link>
         </div>
       </section>

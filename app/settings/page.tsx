@@ -4,7 +4,14 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../../auth'
 
 export default async function SettingsPage() {
-  const session = await getServerSession(authOptions)
+  let session = null
+  if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
+    try {
+      session = await getServerSession(authOptions)
+    } catch {
+      session = null
+    }
+  }
 
   if (!session) {
     redirect('/')

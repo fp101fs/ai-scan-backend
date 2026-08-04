@@ -54,7 +54,15 @@ const steps: Step[] = [
 ]
 
 export default async function Home() {
-  const session = await getServerSession(authOptions)
+  let session = null
+  if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
+    try {
+      session = await getServerSession(authOptions)
+    } catch {
+      session = null
+    }
+  }
+
   const isAuthenticated = Boolean(session?.user)
 
   return (
@@ -64,15 +72,20 @@ export default async function Home() {
           <h2>
             <span className="text-gradient">AI Scan</span>
           </h2>
-          {isAuthenticated ? (
-            <Link href="/dashboard" className="btn btn-primary">
-              Go to Dashboard
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <Link href="/scan" className="btn btn-secondary">
+              Try Web Scanner
             </Link>
-          ) : (
-            <Link href="/api/auth/signin" className="btn btn-primary">
-              Sign In
-            </Link>
-          )}
+            {isAuthenticated ? (
+              <Link href="/dashboard" className="btn btn-primary">
+                Go to Dashboard
+              </Link>
+            ) : (
+              <Link href="/api/auth/signin" className="btn btn-primary">
+                Sign In
+              </Link>
+            )}
+          </div>
         </div>
       </header>
 
@@ -99,17 +112,22 @@ export default async function Home() {
                 lineHeight: 1.7,
               }}
             >
-              AI Scan is a Chrome extension that analyzes web pages and pasted text in real time, giving you a clear AI-probability score with detailed breakdowns — right where you browse.
+              AI Scan is a Chrome extension and web platform that analyzes web pages and text in real time, giving you a clear AI-probability score with detailed breakdowns.
             </p>
-            {isAuthenticated ? (
-              <Link href="/dashboard" className="btn btn-primary btn-lg">
-                Go to Dashboard
+            <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link href="/scan" className="btn btn-primary btn-lg">
+                Try Web Scanner (GPTZero Style)
               </Link>
-            ) : (
-              <Link href="/api/auth/signin" className="btn btn-primary btn-lg">
-                Get Started — It's Free
-              </Link>
-            )}
+              {isAuthenticated ? (
+                <Link href="/dashboard" className="btn btn-secondary btn-lg">
+                  Dashboard
+                </Link>
+              ) : (
+                <Link href="/api/auth/signin" className="btn btn-secondary btn-lg">
+                  Sign In with Google
+                </Link>
+              )}
+            </div>
           </div>
         </section>
 
