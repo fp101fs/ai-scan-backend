@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../../auth'
 import { getOpenRouterKeyInfo, getOpenRouterKeyHash } from '../../lib/openrouter'
+import ThemeToggle from '@/components/ThemeToggle'
 
 interface ScanRecord {
   url: string
@@ -116,6 +117,7 @@ export default async function DashboardPage() {
           <Link href="/comparison" className="btn btn-secondary btn-sm">
             Comparison
           </Link>
+          <ThemeToggle />
           <Link href="/settings" className="btn btn-secondary btn-sm">
             Settings
           </Link>

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../auth'
+import ThemeToggle from '../components/ThemeToggle'
 
 interface Feature {
   icon: string
@@ -121,6 +122,7 @@ export default async function Home() {
             <Link href="/scan" className="btn btn-secondary btn-sm">
               Launch Web Scanner
             </Link>
+            <ThemeToggle />
             {isAuthenticated ? (
               <Link href="/dashboard" className="btn btn-primary btn-sm">
                 Dashboard ({user?.name?.split(' ')[0] || 'Account'})

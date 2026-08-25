@@ -12,8 +12,9 @@
 /* --------------------------------------------------------------------------
    2. Design Tokens
    -------------------------------------------------------------------------- */
-:root {
-  /* Core palette */
+:root,
+[data-theme="dark"] {
+  /* Core palette (Dark) */
   --bg-primary: #0a0a1a;
   --bg-secondary: #0d0d22;
   --bg-card: rgba(15, 15, 35, 0.8);
@@ -71,6 +72,42 @@
   --header-height: 64px;
 
   color-scheme: dark;
+}
+
+[data-theme="light"] {
+  /* Core palette (Light) */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-elevated: #ffffff;
+  --bg-input: #ffffff;
+
+  /* Accent */
+  --accent: #4f46e5;
+  --accent-light: #7c3aed;
+  --accent-glow: rgba(79, 70, 229, 0.25);
+
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+
+  /* Semantic */
+  --success: #16a34a;
+  --danger: #dc2626;
+  --warning: #d97706;
+
+  /* Borders */
+  --border: rgba(148, 163, 184, 0.35);
+  --border-strong: rgba(79, 70, 229, 0.45);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 16px 48px rgba(15, 23, 42, 0.12);
+  --shadow-glow: 0 0 24px var(--accent-glow);
+
+  color-scheme: light;
 }
 
 /* Registered property — enables smooth conic-gradient score-ring animation */
@@ -817,4 +854,145 @@ body {
   border: 1px solid var(--border);
   font-size: 13px;
   font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   18. Light Mode Theme Overrides
+   -------------------------------------------------------------------------- */
+[data-theme="light"] body {
+  background-color: var(--bg-primary);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(79, 70, 229, 0.08), transparent),
+    radial-gradient(ellipse 60% 40% at 90% 110%, rgba(124, 58, 237, 0.05), transparent);
+}
+
+[data-theme="light"] .glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme="light"] .glass-card-interactive:hover {
+  border-color: var(--accent);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1), 0 0 24px rgba(79, 70, 229, 0.12);
+}
+
+[data-theme="light"] .form-input,
+[data-theme="light"] .form-select,
+[data-theme="light"] .form-textarea {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid rgba(203, 213, 225, 0.8);
+}
+
+[data-theme="light"] .form-input:focus,
+[data-theme="light"] .form-select:focus,
+[data-theme="light"] .form-textarea:focus {
+  background: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15), 0 0 16px rgba(79, 70, 229, 0.1);
+}
+
+[data-theme="light"] .btn-secondary {
+  color: #1e293b;
+  background: #ffffff;
+  border-color: rgba(203, 213, 225, 0.9);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .btn-secondary:hover {
+  background: #f8fafc;
+  border-color: var(--accent);
+  color: #0f172a;
+}
+
+[data-theme="light"] .table-container {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme="light"] .table-container thead th {
+  background: #f1f5f9;
+  color: #475569;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+[data-theme="light"] .table-container tbody td {
+  color: #0f172a;
+  border-bottom: 1px solid rgba(241, 245, 249, 0.9);
+}
+
+[data-theme="light"] .table-container tbody tr:hover {
+  background: #f8fafc;
+}
+
+[data-theme="light"] .badge-ai {
+  color: #991b1b;
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+[data-theme="light"] .badge-human {
+  color: #166534;
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
+[data-theme="light"] .badge-neutral {
+  color: #334155;
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+[data-theme="light"] .sentence-highlight-ai {
+  background: rgba(239, 68, 68, 0.16);
+  border-bottom: 2px solid #dc2626;
+  color: #7f1d1d;
+}
+
+[data-theme="light"] .sentence-highlight-ai:hover {
+  background: rgba(239, 68, 68, 0.28);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+}
+
+[data-theme="light"] .sentence-highlight-mixed {
+  background: rgba(245, 158, 11, 0.16);
+  border-bottom: 2px solid #d97706;
+  color: #78350f;
+}
+
+[data-theme="light"] .sentence-highlight-mixed:hover {
+  background: rgba(245, 158, 11, 0.28);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+}
+
+[data-theme="light"] .sentence-highlight-human {
+  background: transparent;
+  color: inherit;
+  border-bottom: 1px dashed rgba(22, 163, 74, 0.4);
+}
+
+[data-theme="light"] .sentence-highlight-human:hover {
+  background: rgba(34, 197, 94, 0.08);
+  border-bottom-color: var(--success);
+}
+
+[data-theme="light"] .tab-btn {
+  color: #475569;
+}
+
+[data-theme="light"] .tab-btn:hover {
+  color: #0f172a;
+  background: rgba(79, 70, 229, 0.06);
+}
+
+[data-theme="light"] .tab-btn-active {
+  color: #4f46e5;
+  background: rgba(79, 70, 229, 0.1);
+  border-color: #4f46e5;
+}
+
+[data-theme="light"] .gauge-track {
+  background: rgba(15, 23, 42, 0.08);
 }

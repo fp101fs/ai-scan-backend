@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import ThemeToggle from '@/components/ThemeToggle'
 
 export const metadata: Metadata = {
   title: 'AI Scan vs GPTZero vs ZeroGPT — Technical Comparison & Architecture',
@@ -11,16 +12,25 @@ export default function ComparisonPage() {
   return (
     <div className="container" style={{ paddingTop: 40, paddingBottom: 80 }}>
       {/* Breadcrumb / Top Bar */}
-      <header style={{ marginBottom: 32 }}>
-        <Link href="/" className="text-link" style={{ fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-          &larr; Back to Home
-        </Link>
-        <h1 className="text-gradient" style={{ fontSize: 34, marginTop: 12, marginBottom: 8 }}>
-          AI Scan vs GPTZero vs ZeroGPT
-        </h1>
-        <p className="text-secondary" style={{ fontSize: 16, maxWidth: 760 }}>
-          How commercial AI detectors actually work under the hood, whether they use LLMs, and how AI Scan fuses both methodologies into an open, transparent platform.
-        </p>
+      <header style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
+        <div>
+          <Link href="/" className="text-link" style={{ fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            &larr; Back to Home
+          </Link>
+          <h1 className="text-gradient" style={{ fontSize: 34, marginTop: 12, marginBottom: 8 }}>
+            AI Scan vs GPTZero vs ZeroGPT
+          </h1>
+          <p className="text-secondary" style={{ fontSize: 16, maxWidth: 760 }}>
+            How commercial AI detectors actually work under the hood, whether they use LLMs, and how AI Scan fuses both methodologies into an open, transparent platform.
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Link href="/scan" className="btn btn-primary btn-sm">
+            Launch Scanner
+          </Link>
+          <ThemeToggle />
+        </div>
       </header>
 
       {/* Direct Comparison Table */}

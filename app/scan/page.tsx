@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
+import ThemeToggle from '@/components/ThemeToggle'
 
 interface ParagraphResult {
   text: string
@@ -257,6 +258,7 @@ export default function ScanPage() {
           <Link href="/comparison" className="btn btn-secondary btn-sm">
             Comparison vs GPTZero
           </Link>
+          <ThemeToggle />
           {session?.user ? (
             <Link href="/dashboard" className="btn btn-secondary btn-sm">
               Dashboard

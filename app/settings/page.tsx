@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../../auth'
 import { getOpenRouterKeyInfo, getOpenRouterKeyHash } from '../../lib/openrouter'
+import ThemeToggle from '@/components/ThemeToggle'
 
 export default async function SettingsPage() {
   let session = null
@@ -49,13 +50,14 @@ export default async function SettingsPage() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
           <Link href="/scan" className="btn btn-primary btn-sm">
             Web Scanner
           </Link>
           <Link href="/comparison" className="btn btn-secondary btn-sm">
             Comparison
           </Link>
+          <ThemeToggle />
         </div>
       </header>
 
