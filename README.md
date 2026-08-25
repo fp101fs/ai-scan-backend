@@ -5,8 +5,9 @@
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-green?logo=python)](https://python.org)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/)
 [![OpenRouter](https://img.shields.io/badge/OpenRouter-OAuth%20PKCE-purple)](https://openrouter.ai)
+[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension%20Companion-blue?logo=googlechrome)](https://github.com/fp101fs/ext-ai-detector)
 
-> **A hybrid ML AI-text detector that fuses "GPTZero-style" multi-model perplexity with "ZeroGPT-style" multi-scale burstiness and stylometrics, combined with a trained binary meta-classifier. Fully local & OpenRouter BYOK.**
+> **A hybrid ML AI-text detector that fuses "GPTZero-style" multi-model perplexity with "ZeroGPT-style" multi-scale burstiness and stylometrics, combined with a trained binary meta-classifier. Fully local, Vercel-ready, with OpenRouter BYOK & Chrome Extension companion.**
 
 ---
 
@@ -14,7 +15,7 @@
 
 The AI text detection engine mathematically fuses **GPTZero-style multi-model perplexity** and **ZeroGPT-style multi-scale burstiness & stylometrics** through a trained binary meta-classifier.
 
-No external detection APIs (GPTZero, ZeroGPT) are called. All calculations run locally with open causal language models and Python ML libraries, paired with our OpenRouter BYOK Vercel platform.
+No external detection APIs (GPTZero, ZeroGPT) are called. All calculations run locally with open causal language models, TypeScript serverless algorithms, and Python ML libraries, paired with our OpenRouter BYOK Vercel platform.
 
 ```
                           ┌────────────────────────────────────────────────┐
@@ -69,42 +70,29 @@ $$B_{\text{sent}} = \frac{\sigma_L - \mu_L}{\sigma_L + \mu_L} \in [-1, +1]$$
 
 - $B_{\text{sent}} \approx -1$: Extreme syntactic uniformity ($\sigma_L \approx 0$), characteristic of AI generation.
 - $B_{\text{sent}} > 0$: High rhythmic variance (short declarative sentences mixed with complex clauses), characteristic of human authors.
-- Composite burstiness: $B_{\text{comp}} = 0.50 \cdot B_{\text{sent}} + 0.30 \cdot B_{\text{clause}} + 0.20 \cdot B_{\text{para}}$.
+- Composite burstiness: $B_{\text{comp}} = 0.55 \cdot B_{\text{sent}} + 0.45 \cdot B_{\text{clause}}$.
 
 ### 3. Stylometric Markers
 - **Vocabulary Diversity**: Type-Token Ratio $\text{TTR} = \frac{\text{unique\_tokens}}{\text{total\_tokens}}$ and Root-TTR $\frac{\text{unique}}{\sqrt{\text{total}}}$.
 - **Passive Voice Ratio**: Frequency of passive constructions per sentence.
 - **N-Gram Repetition**: 3-gram and 4-gram repetition fractions.
-- **AI Transition Density**: Detection frequency of stereotypical transition templates ("furthermore", "moreover", "in conclusion", "it is important to note", "delve into", "testament to", "tapestry", "seamlessly").
+- **AI Transition Density**: 20-pattern regex suite scanning for characteristic connective clichés ("furthermore", "moreover", "in conclusion", "it is important to note", "delve into", "testament to", "tapestry", "seamlessly").
 
 ---
 
-## 📁 Implemented Code Structure
+## 🧩 Chrome Extension Companion
 
-```
-├── ai_detector.py         # Main executable CLI entrypoint
-├── METHODOLOGY.md         # Detailed mathematical formulation & algorithmic breakdown
-├── src/
-│   ├── perplexity.py      # Multi-model causal LM sliding-window perplexity engine
-│   ├── burstiness.py      # ZeroGPT-style multi-scale sentence/clause/paragraph burstiness
-│   ├── stylometry.py      # Vocabulary diversity (TTR), passive voice, n-grams & AI phrases
-│   ├── features.py        # Assembles standardized feature vectors (doc & sentence level)
-│   ├── classifier.py      # Binary meta-classifier (Logistic / GBDT / Forest) with calibration
-│   └── cli.py             # CLI commands (detect, train, batch)
-├── requirements.txt       # PyTorch, Transformers, Scikit-learn, spaCy
-├── data/
-│   ├── human/             # Calibration human-written texts
-│   └── ai/                # Calibration AI-generated texts
-├── lib/
-│   └── heuristics.ts      # Synced TypeScript stylometric & burstiness engine
-└── app/                   # Next.js 14 web scanner & OpenRouter OAuth backend
-```
+AI Scan includes an official browser extension companion: **[`ext-ai-detector`](https://github.com/fp101fs/ext-ai-detector)**.
+
+- **In-Page Highlight Overlays**: Highlights AI paragraphs directly on any live article, Reddit thread, or documentation page (🔴 Red $>50\%$, 🟢 Green $<50\%$).
+- **Clickable Detail Modals**: Inspect word counts, detection method, burstiness index, and perplexity scores for any paragraph.
+- **Direct API & Offline Sync**: Uses the same mathematical formulas and supports OpenRouter BYOK key sync.
 
 ---
 
-## 💻 CLI Usage Examples
+## 💻 Python CLI Quickstart
 
-### 1. Document & Sentence-Level Detection
+### 1. Run Document & Sentence-Level Detection
 ```bash
 python3 ai_detector.py detect --file data/ai/sample1.txt --threshold 0.60
 ```
@@ -133,7 +121,7 @@ SENTENCE-BY-SENTENCE BREAKDOWN (Threshold: 60%):
 ======================================================================
 ```
 
-### 2. Training Meta-Classifier on Custom Calibration Data
+### 2. Train Meta-Classifier on Custom Datasets
 ```bash
 python3 ai_detector.py train \
   --human-dir data/human \
@@ -151,15 +139,47 @@ python3 ai_detector.py batch --input data/batch_test.txt --output data/batch_res
 
 ## 🌐 Web Platform & OpenRouter OAuth (BYOK)
 
-The web platform (Vercel-hosted) integrates the same stylometric calculations with OpenRouter OAuth (PKCE) for multi-model verification:
-- **1-Click OAuth (PKCE)**: Connect your OpenRouter account without copying keys.
+The web platform (Next.js 14 / Vercel) integrates the hybrid stylometric calculations with OpenRouter OAuth (PKCE):
+- **1-Click OAuth (PKCE)**: Connect your OpenRouter account without handling raw keys.
 - **Multi-Model Support**: Verify using `gpt-4o-mini`, `gemini-2.5-flash`, `deepseek-chat`, or `claude-3.5-haiku`.
 - **Zero-Retention**: Scans run in-memory and are never stored or used to train models.
+- **Dark / Light Theme**: Built-in dynamic theme system with anti-FOUC script.
 
 Run the web frontend:
 ```bash
 npm install
 npm run dev
+```
+
+---
+
+## 📁 Project Structure
+
+```
+├── ai_detector.py         # Main executable CLI entrypoint
+├── METHODOLOGY.md         # Detailed mathematical formulation & algorithmic breakdown
+├── src/
+│   ├── perplexity.py      # Multi-model causal LM sliding-window perplexity engine
+│   ├── burstiness.py      # ZeroGPT-style multi-scale sentence/clause/paragraph burstiness
+│   ├── stylometry.py      # Vocabulary diversity (TTR), passive voice, n-grams & AI phrases
+│   ├── features.py        # Assembles standardized feature vectors (doc & sentence level)
+│   ├── classifier.py      # Binary meta-classifier (Logistic / GBDT / Forest) with calibration
+│   └── cli.py             # CLI commands (detect, train, batch)
+├── requirements.txt       # PyTorch, Transformers, Scikit-learn, spaCy
+├── data/
+│   ├── human/             # Calibration human-written texts
+│   └── ai/                # Calibration AI-generated texts
+├── lib/
+│   ├── heuristics.ts      # Synced TypeScript stylometric & burstiness engine
+│   └── openrouter.ts      # OpenRouter OAuth (PKCE) integration
+├── components/
+│   └── ThemeToggle.tsx    # Light / Dark theme toggle
+├── app/
+│   ├── comparison/        # Dedicated technical comparison page
+│   ├── scan/              # Live interactive web scanner UI
+│   ├── dashboard/         # OpenRouter usage tracking & keys
+│   └── settings/          # Model selection & thresholds
+└── README.md
 ```
 
 ---
