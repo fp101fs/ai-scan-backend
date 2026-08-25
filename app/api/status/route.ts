@@ -16,11 +16,19 @@ export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   const authHeader = req.headers.get("authorization");
 
+  const sessionUser = session?.user as any;
+  const hasUserKey = Boolean(sessionUser?.openRouterKey);
+  const hasServerKey = Boolean(process.env.OPENROUTER_API_KEY);
+
   return NextResponse.json(
     {
       status: "ok",
       authenticated: !!(session || authHeader?.startsWith("Bearer ")),
-      openrouterConfigured: !!process.env.OPENROUTER_API_KEY,
+      authMethod: hasUserKey ? "openrouter_oauth" : session?.user ? "google" : "none",
+      openrouterConfigured: hasUserKey || hasServerKey,
+      openrouterKeyType: hasUserKey ? "user_oauth" : hasServerKey ? "server_managed" : "none",
+      heuristicEngineReady: true,
+      supportedModes: ["openrouter", "hybrid", "heuristic"],
       timestamp: new Date().toISOString(),
     },
     { headers: corsHeaders }

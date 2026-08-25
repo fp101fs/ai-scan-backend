@@ -1,0 +1,46 @@
+[
+  {
+    "id": 0,
+    "text_preview": "I stopped by the hardware store on Saturday to pick up some brass screws for my deck....",
+    "ai_probability": 0.198,
+    "verdict": "Likely Human-Written",
+    "perplexity_score": 0.2417,
+    "burstiness_score": 0.0,
+    "sentences": [
+      {
+        "index": 0,
+        "text": "I stopped by the hardware store on Saturday to pick up some brass screws for my deck.",
+        "word_count": 17,
+        "ai_probability": 0.0,
+        "ai_percentage": 0.0,
+        "is_ai_likely": false
+      }
+    ]
+  },
+  {
+    "id": 1,
+    "text_preview": "The advancement of modern neural networks represents a paradigm shift in technological innovation. Furthermore, it is im...",
+    "ai_probability": 1.0,
+    "verdict": "Entirely AI-Generated",
+    "perplexity_score": 0.1141,
+    "burstiness_score": -0.5297,
+    "sentences": [
+      {
+        "index": 0,
+        "text": "The advancement of modern neural networks represents a paradigm shift in technological innovation.",
+        "word_count": 13,
+        "ai_probability": 0.0,
+        "ai_percentage": 0.0,
+        "is_ai_likely": false
+      },
+      {
+        "index": 1,
+        "text": "Furthermore, it is important to note that computational systems optimize workflow efficiency.",
+        "word_count": 12,
+        "ai_probability": 1.0,
+        "ai_percentage": 100.0,
+        "is_ai_likely": true
+      }
+    ]
+  }
+]

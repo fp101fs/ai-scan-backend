@@ -1,15 +1,16 @@
 import { getServerSession } from "next-auth/next";
+import { decode } from "next-auth/jwt";
 import { authOptions } from "../../../auth";
 import { NextRequest, NextResponse } from "next/server";
+import { analyzeHeuristics } from "../../../lib/heuristics";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 const SYSTEM_PROMPT = `You are GPTZero-Sim, an advanced statistical text-analysis engine trained to detect AI-generated content. Your task is to evaluate the provided target text using the core metrics of natural language statistical unpredictability and machine-learning stylometrics.
 
 ### ANALYSIS INSTRUCTIONS
-
 Analyze the input text across four specific dimensions:
-1. Perplexity (Predictability)
+1. Perplexity (Predictability & Lexical entropy)
 2. Burstiness (Sentence & Rhythm Variation)
 3. Structural & Syntax Uniformity
 4. Synthetic Markers & Transition Densities
@@ -20,7 +21,7 @@ CRITICAL: You MUST respond ONLY with valid, unformatted JSON containing exactly 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-OpenRouter-Key, X-Detection-Model",
 };
 
 export async function OPTIONS() {
@@ -29,19 +30,36 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   try {
-    // Check authentication — allow both session and Bearer token
     const session = await getServerSession(authOptions);
     const authHeader = req.headers.get("authorization");
+    const customKeyHeader = req.headers.get("x-openrouter-key");
 
-    if (!session && !authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json(
-        { error: "Unauthorized — sign in required" },
-        { status: 401, headers: corsHeaders }
-      );
+    let sessionUser = session?.user as any;
+    let effectiveApiKey =
+      customKeyHeader ||
+      sessionUser?.openRouterKey ||
+      process.env.OPENROUTER_API_KEY;
+
+    // Check Bearer JWT token if sent by Chrome extension
+    if (!effectiveApiKey && authHeader?.startsWith("Bearer ")) {
+      const tokenString = authHeader.replace("Bearer ", "").trim();
+      const secret =
+        process.env.AUTH_SECRET ||
+        process.env.NEXTAUTH_SECRET ||
+        "ai-scan-secret-production-key-9284102941";
+
+      try {
+        const decoded = await decode({ token: tokenString, secret });
+        if (decoded?.openRouterKey) {
+          effectiveApiKey = decoded.openRouterKey as string;
+        }
+      } catch {
+        // Bearer token decode failed, continue to check fallback
+      }
     }
 
     const body = await req.json();
-    const { paragraphs } = body;
+    const { paragraphs, mode = "hybrid", model = "openai/gpt-4o-mini" } = body;
 
     if (!paragraphs || !Array.isArray(paragraphs) || paragraphs.length === 0) {
       return NextResponse.json(
@@ -50,19 +68,52 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Require authentication or heuristic mode if no API key is available
+    if (mode !== "heuristic" && !effectiveApiKey) {
+      // Fallback gracefully to heuristic mode if no OpenRouter key is configured
+      console.warn("No OpenRouter API key found. Falling back to heuristic mode.");
+    }
+
     // Cap at 100 paragraphs per request
     const toScan = paragraphs.slice(0, 100);
     const results = [];
 
     for (const para of toScan) {
-      const aiProb = await callOpenRouter(para.text);
+      const text = typeof para === "string" ? para : para.text || "";
+      const index = typeof para === "object" ? para.index ?? results.length : results.length;
+      
+      const heuristicStats = analyzeHeuristics(text);
+      let aiProb = heuristicStats.aiProbability;
+      let usedMethod = "heuristic";
+
+      if (effectiveApiKey && (mode === "openrouter" || mode === "hybrid")) {
+        try {
+          const aiResponse = await callOpenRouter(text, effectiveApiKey, model);
+          if (mode === "hybrid") {
+            // Weighted average: 65% OpenRouter AI model, 35% statistical heuristics
+            aiProb = Math.round((aiResponse * 0.65 + heuristicStats.aiProbability * 0.35) * 100) / 100;
+            usedMethod = "hybrid";
+          } else {
+            aiProb = aiResponse;
+            usedMethod = "openrouter";
+          }
+        } catch (err: any) {
+          console.warn("OpenRouter call failed, falling back to heuristic score:", err.message);
+          aiProb = heuristicStats.aiProbability;
+          usedMethod = "heuristic-fallback";
+        }
+      }
 
       results.push({
-        index: para.index,
-        text: para.text,
-        wordCount: para.wordCount || para.text.split(/\s+/).length,
+        index,
+        text,
+        wordCount: heuristicStats.wordCount,
+        sentenceCount: heuristicStats.sentenceCount,
         aiProbability: aiProb,
-        method: "openrouter",
+        perplexityScore: heuristicStats.perplexityScore,
+        burstinessScore: heuristicStats.burstinessScore,
+        vocabularyScore: heuristicStats.vocabularyScore,
+        method: usedMethod,
       });
     }
 
@@ -76,11 +127,12 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function callOpenRouter(text: string): Promise<number> {
-  const truncated = text.substring(0, 1000);
-  const apiKey = process.env.OPENROUTER_API_KEY;
-
-  if (!apiKey) throw new Error("OPENROUTER_API_KEY not configured on server");
+async function callOpenRouter(
+  text: string,
+  apiKey: string,
+  modelName: string = "openai/gpt-4o-mini"
+): Promise<number> {
+  const truncated = text.substring(0, 1500);
 
   const response = await fetch(OPENROUTER_URL, {
     method: "POST",
@@ -88,10 +140,10 @@ async function callOpenRouter(text: string): Promise<number> {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
       "HTTP-Referer": process.env.NEXTAUTH_URL || "https://ai-scan-backend.vercel.app",
-      "X-Title": "AI Scan Backend",
+      "X-Title": "AI Scan (ProductHunt)",
     },
     body: JSON.stringify({
-      model: "openai/gpt-5.6-luna",
+      model: modelName,
       messages: [
         {
           role: "system",
@@ -121,22 +173,19 @@ async function callOpenRouter(text: string): Promise<number> {
     const parsed = JSON.parse(content);
     const val = Number(parsed.ai_probability ?? parsed.probability ?? parsed.score);
     if (!isNaN(val)) {
-      // Normalize percentage (e.g. 85 -> 0.85) if model returned > 1
       const normalized = val > 1 ? val / 100 : val;
-      return Math.max(0, Math.min(1, normalized));
+      return Math.max(0, Math.min(1, Math.round(normalized * 100) / 100));
     }
   } catch {
-    // Robust fallback regex for numbers between 0 and 100 or floats
     const match = content.match(/ai_probability["\s:]+([0-9.]+)/i) || content.match(/([0-9.]+)/);
     if (match) {
       const val = parseFloat(match[1]);
       if (!isNaN(val)) {
         const normalized = val > 1 ? val / 100 : val;
-        return Math.max(0, Math.min(1, normalized));
+        return Math.max(0, Math.min(1, Math.round(normalized * 100) / 100));
       }
     }
   }
 
-  console.error("Failed raw content:", rawContent);
   throw new Error(`Could not parse OpenRouter response (raw output: ${rawContent.substring(0, 60)})`);
 }

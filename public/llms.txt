@@ -1,0 +1,28 @@
+# AI Scan (AI Content Detector & Stylometrics)
+
+> Transparent, multi-model AI text detection powered by OpenRouter OAuth (PKCE) and statistical stylometric heuristics (Perplexity, Burstiness variance, and Type-Token Ratio).
+
+## Overview
+AI Scan provides high-accuracy AI content verification for researchers, educators, creators, and developers. Users can bring their own OpenRouter account via 1-click OAuth PKCE or utilize the built-in offline statistical heuristic engine.
+
+## Core Capabilities
+- **Dual-Engine Analysis**: Blends LLM stylometric evaluation (OpenRouter) with mathematical text entropy metrics.
+- **OpenRouter OAuth (BYOK)**: Connect your OpenRouter account securely with PKCE. Use direct inference credits with zero markup.
+- **Statistical Stylometrics**: Evaluates sentence length variance (Burstiness), Type-Token Ratio (Vocabulary diversity), and structural transition markers.
+- **Multi-Model Verification**: Supports OpenAI GPT-4o Mini, Google Gemini 2.5 Flash, DeepSeek V3, and Anthropic Claude 3.5 Haiku.
+- **Zero Data Retention**: Scanned text is evaluated in-memory and never stored, indexed, or shared.
+
+## Key Endpoints
+- `POST /api/scan`: Analyze an array of paragraphs for AI probability.
+  - Headers: `Content-Type: application/json`, optional `Authorization: Bearer <jwt>`, optional `X-OpenRouter-Key: <key>`
+  - Body: `{"paragraphs": [{"text": "...", "index": 0}], "mode": "hybrid|openrouter|heuristic", "model": "openai/gpt-4o-mini"}`
+  - Response: Array of paragraph objects with `aiProbability` (0.0 - 1.0), `perplexityScore`, `burstinessScore`, `vocabularyScore`, and `method`.
+- `GET /api/status`: Check system and OpenRouter configuration status.
+- `GET /api/auth/openrouter/login`: Initiate 1-click OpenRouter OAuth PKCE flow.
+- `POST /api/auth/openrouter/exchange`: Programmatic PKCE token exchange for Chrome Extensions and external clients.
+
+## Links & Resources
+- Website & Web Scanner: https://ai-scan-backend.vercel.app/scan
+- Full Technical Documentation: https://ai-scan-backend.vercel.app/llms-full.txt
+- OpenRouter Documentation: https://openrouter.ai/docs
+- OpenRouter OAuth Guide: https://openrouter.ai/docs/guides/overview/auth/oauth

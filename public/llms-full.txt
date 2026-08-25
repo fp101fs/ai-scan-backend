@@ -1,0 +1,122 @@
+# AI Scan — Comprehensive Technical & API Reference for LLMs
+
+## System Architecture
+
+AI Scan operates as a hybrid AI detection and stylometric evaluation engine combining statistical linguistics with multi-model LLM verification.
+
+```
+┌────────────────────────────────────────────────────────┐
+│                   Client Layer                         │
+│  - Web Scanner UI (React 18 / Next.js 14)              │
+│  - Chrome Extension (Content script + Background)      │
+│  - External API Integrations (cURL / Python / Node)    │
+└───────────────────────────┬────────────────────────────┘
+                            │
+┌───────────────────────────▼────────────────────────────┐
+│              Authentication & Gateway Layer            │
+│  - OpenRouter OAuth (PKCE S256 Flow)                   │
+│  - NextAuth JWT Session Management                     │
+│  - Bearer Token / Header-based BYOK Override           │
+└───────────────────────────┬────────────────────────────┘
+                            │
+              ┌─────────────┴─────────────┐
+              │                           │
+┌─────────────▼─────────────┐ ┌───────────▼──────────────┐
+│  Statistical Heuristics   │ │    OpenRouter LLM Proxy   │
+│  - Burstiness (CV of len) │ │  - GPT-4o Mini / Gemini  │
+│  - Type-Token Ratio (TTR) │ │  - DeepSeek / Claude     │
+│  - Transition Density     │ │  - Structured JSON Mode  │
+└─────────────┬─────────────┘ └───────────┬──────────────┘
+              │                           │
+              └─────────────┬─────────────┘
+                            │
+┌───────────────────────────▼────────────────────────────┐
+│                    Hybrid Scoring                      │
+│     AI Score = (0.65 * LLM_Score) + (0.35 * Heuristic) │
+└────────────────────────────────────────────────────────┘
+```
+
+## Mathematical & Stylometric Methodology
+
+### 1. Burstiness Metric
+Burstiness measures the coefficient of variation ($CV$) of sentence lengths throughout the document:
+$$CV = \frac{\sigma}{\mu}$$
+Where $\mu$ is the mean sentence length in words and $\sigma$ is the standard deviation.
+Human writing demonstrates high burstiness ($CV > 0.70$) through rhythmic shifts (combining punchy short clauses with long elaborations). Large language models exhibit low burstiness ($CV < 0.35$) with syntactically uniform sentence lengths.
+
+### 2. Vocabulary Diversity (Type-Token Ratio - TTR)
+$$TTR = \frac{\text{Unique Tokens}}{\text{Total Tokens}}$$
+To prevent document-length bias, the expected TTR is normalized against logarithmic token scaling:
+$$\text{Expected } TTR = \min\left(1, \frac{1.2}{\log_{10}(\text{Total Tokens} + 10)}\right)$$
+
+### 3. Synthetic Transition Density
+Scans for characteristic AI transition markers and formulaic connectors ("furthermore", "moreover", "in conclusion", "it is important to note", "delve into", "testament to", "tapestry", "seamlessly").
+
+## API Endpoints
+
+### 1. `POST /api/scan`
+Analyzes text paragraphs and returns probability scores.
+
+**Headers:**
+- `Content-Type: application/json`
+- `Authorization`: `Bearer <JWT_TOKEN>` (optional)
+- `X-OpenRouter-Key`: `<API_KEY>` (optional client override)
+
+**Request Body:**
+```json
+{
+  "paragraphs": [
+    { "index": 0, "text": "The quick brown fox jumps over the lazy dog." }
+  ],
+  "mode": "hybrid",
+  "model": "openai/gpt-4o-mini"
+}
+```
+
+**Response (200 OK):**
+```json
+[
+  {
+    "index": 0,
+    "text": "The quick brown fox jumps over the lazy dog.",
+    "wordCount": 9,
+    "sentenceCount": 1,
+    "aiProbability": 0.12,
+    "perplexityScore": 85,
+    "burstinessScore": 72,
+    "vocabularyScore": 100,
+    "method": "hybrid"
+  }
+]
+```
+
+### 2. `GET /api/status`
+Returns server health, authentication state, and engine readiness.
+
+**Response (200 OK):**
+```json
+{
+  "status": "ok",
+  "authenticated": true,
+  "authMethod": "openrouter_oauth",
+  "openrouterConfigured": true,
+  "openrouterKeyType": "user_oauth",
+  "heuristicEngineReady": true,
+  "supportedModes": ["openrouter", "hybrid", "heuristic"],
+  "timestamp": "2026-08-25T18:55:00.000Z"
+}
+```
+
+### 3. `GET /api/auth/openrouter/login`
+Redirects browser to OpenRouter OAuth PKCE authorization dialog.
+
+### 4. `POST /api/auth/openrouter/exchange`
+Exchanges authorization code for an API key and signed JWT session token.
+
+**Request Body:**
+```json
+{
+  "code": "AUTH_CODE_FROM_OPENROUTER",
+  "codeVerifier": "YOUR_PKCE_CODE_VERIFIER"
+}
+```
