@@ -36,16 +36,27 @@ export default async function SettingsPage() {
 
   return (
     <div className="container" style={{ paddingTop: 40, paddingBottom: 64 }}>
-      <header style={{ marginBottom: 32 }}>
-        <Link href="/dashboard" className="text-link" style={{ fontSize: 14 }}>
-          ← Back to Dashboard
-        </Link>
-        <h1 className="text-gradient" style={{ marginTop: 12, fontSize: 32 }}>
-          API & Detection Settings
-        </h1>
-        <p className="text-secondary" style={{ marginTop: 4, fontSize: 15 }}>
-          Manage your OpenRouter integration, detection defaults, and Chrome extension pairing.
-        </p>
+      <header style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
+        <div>
+          <Link href="/dashboard" className="text-link" style={{ fontSize: 14 }}>
+            ← Back to Dashboard
+          </Link>
+          <h1 className="text-gradient" style={{ marginTop: 8, fontSize: 32 }}>
+            API & Detection Settings
+          </h1>
+          <p className="text-secondary" style={{ marginTop: 4, fontSize: 15 }}>
+            Manage your OpenRouter integration, detection defaults, and Chrome extension pairing.
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <Link href="/scan" className="btn btn-primary btn-sm">
+            Web Scanner
+          </Link>
+          <Link href="/comparison" className="btn btn-secondary btn-sm">
+            Comparison
+          </Link>
+        </div>
       </header>
 
       <div className="card-grid-2">

@@ -437,6 +437,7 @@ export default async function Home() {
           </p>
           <div style={{ display: 'flex', gap: 20, fontSize: 14 }} className="text-secondary">
             <Link href="/scan" className="text-link">Scanner</Link>
+            <Link href="/comparison" className="text-link">Comparison</Link>
             <Link href="/dashboard" className="text-link">Dashboard</Link>
             <Link href="/settings" className="text-link">Settings</Link>
             <a href="/llms.txt" target="_blank" className="text-link">llms.txt</a>

@@ -113,6 +113,9 @@ export default async function DashboardPage() {
           <Link href="/scan" className="btn btn-primary btn-sm">
             ⚡ Web Scanner
           </Link>
+          <Link href="/comparison" className="btn btn-secondary btn-sm">
+            Comparison
+          </Link>
           <Link href="/settings" className="btn btn-secondary btn-sm">
             Settings
           </Link>

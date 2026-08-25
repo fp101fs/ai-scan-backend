@@ -253,7 +253,10 @@ export default function ScanPage() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Link href="/comparison" className="btn btn-secondary btn-sm">
+            Comparison vs GPTZero
+          </Link>
           {session?.user ? (
             <Link href="/dashboard" className="btn btn-secondary btn-sm">
               Dashboard
