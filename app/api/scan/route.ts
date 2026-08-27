@@ -3,6 +3,7 @@ import { decode } from "next-auth/jwt";
 import { authOptions } from "../../../auth";
 import { NextRequest, NextResponse } from "next/server";
 import { analyzeHeuristics } from "../../../lib/heuristics";
+import { scanWithGPTZero } from "../../../lib/gptzero";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
@@ -82,39 +83,51 @@ export async function POST(req: NextRequest) {
       const text = typeof para === "string" ? para : para.text || "";
       const index = typeof para === "object" ? para.index ?? results.length : results.length;
       
-      const heuristicStats = analyzeHeuristics(text);
-      let aiProb = heuristicStats.aiProbability;
-      let usedMethod = "heuristic";
+      const gptZeroStats = scanWithGPTZero(text);
+      let aiProb = gptZeroStats.overallAiProbability / 100;
+      let usedMethod = "gptzero-engine";
 
       if (effectiveApiKey && (mode === "openrouter" || mode === "hybrid")) {
         try {
           const aiResponse = await callOpenRouter(text, effectiveApiKey, model);
           if (mode === "hybrid") {
-            // Weighted average: 65% OpenRouter AI model, 35% statistical heuristics
-            aiProb = Math.round((aiResponse * 0.65 + heuristicStats.aiProbability * 0.35) * 100) / 100;
-            usedMethod = "hybrid";
+            aiProb = Math.round((aiResponse * 0.65 + (gptZeroStats.overallAiProbability / 100) * 0.35) * 100) / 100;
+            usedMethod = "gptzero-hybrid";
           } else {
             aiProb = aiResponse;
             usedMethod = "openrouter";
           }
         } catch (err: any) {
-          console.warn("OpenRouter call failed, falling back to heuristic score:", err.message);
-          aiProb = heuristicStats.aiProbability;
-          usedMethod = "heuristic-fallback";
+          console.warn("OpenRouter call failed, falling back to GPTZero score:", err.message);
+          aiProb = gptZeroStats.overallAiProbability / 100;
+          usedMethod = "gptzero-fallback";
         }
       }
 
       results.push({
         index,
         text,
-        wordCount: heuristicStats.wordCount,
-        sentenceCount: heuristicStats.sentenceCount,
+        wordCount: text.trim().split(/\s+/).filter(Boolean).length,
+        sentenceCount: gptZeroStats.sentences.length,
         aiProbability: aiProb,
-        perplexityScore: heuristicStats.perplexityScore,
-        burstinessScore: heuristicStats.burstinessScore,
-        vocabularyScore: heuristicStats.vocabularyScore,
+        perplexityScore: gptZeroStats.averagePerplexity,
+        burstinessScore: gptZeroStats.burstinessScore,
+        completelyGeneratedProb: gptZeroStats.completelyGeneratedProb,
+        mixedGeneratedProb: gptZeroStats.mixedGeneratedProb,
+        humanWrittenProb: gptZeroStats.humanWrittenProb,
+        verdict: gptZeroStats.verdict,
+        subVerdict: gptZeroStats.subVerdict,
+        classLabel: gptZeroStats.classLabel,
         method: usedMethod,
-        sentences: heuristicStats.sentences || [],
+        sentences: gptZeroStats.sentences.map((s) => ({
+          text: s.sentence,
+          score: s.score,
+          isAi: s.isAi,
+          wordCount: s.wordCount,
+          perplexity: s.perplexity,
+          highlightColor: s.highlightColor,
+          aiPhraseMatches: s.aiPhrases,
+        })),
       });
     }
 
