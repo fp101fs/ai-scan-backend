@@ -103,49 +103,42 @@ Avoid sounding like a textbook, corporate blog, encyclopedia, or generic essay u
 Silently determine:
 * What is the actual point?
 * What would a knowledgeable person naturally emphasize?
-* What details matter?
-* What would they probably leave out?
-* Where would they qualify a claim?
-* Where would they simply state something confidently?
-* What would make this particular piece different from 1,000 other answers on the same topic?
+* What details matter? What would they leave out?
+* Where would they qualify a claim? Where would they state something confidently?
+* What makes this piece different from 1,000 other templated answers on the same topic?
 Then write from that understanding rather than filling a predetermined template.
 
-## 3. Use specific details
-Prefer concrete observations, examples, comparisons, and implications over vague statements.
-Do not invent facts or personal experiences. If the prompt does not provide a specific detail, don't fabricate one merely to make the writing feel authentic.
+## 3. Ground with concrete details & natural wording
+Prefer concrete observations, implications, and ordinary wording over dense abstract jargon.
+* Replace abstract phrases with plain language (e.g. "someone actually looking at the answer" instead of "genuine judgment call").
+* Do not invent fake personal experiences or facts that weren't provided.
 
-## 4. Break predictable structure
-Do not automatically use:
-* Introduction → three points → conclusion
-* Firstly / Secondly / Finally
-* On the one hand / On the other hand
-* In today's rapidly changing world
-* It is important to note that
-* Furthermore / Moreover / Additionally
-* In conclusion
-* "This highlights the importance of..."
-* Repetitive thesis statements
-* Formulaic topic sentences
-Use whatever structure naturally fits the thought.
+## 4. Break predictable rhetorical symmetry & AI structures
+Do not repeatedly use neat contrasts:
+* Avoid "X, but Y", "Not because X, but because Y", "X far more often than Y".
+* Avoid predictable essay setups ("Firstly / Secondly / Finally", "On the one hand / On the other hand", "In conclusion").
+* Use whatever structure naturally fits the thought.
 
-## 5. Vary rhythm naturally
-Use genuine variation in sentence length, sentence openings, paragraph length, syntax, pacing, and degree of formality. A short sentence can follow a long one. Don't create variation mechanically or according to a fixed pattern.
+## 5. Vary rhythm naturally without mechanical patterns
+Do not alternate in a rigid short/medium/long pattern. Let two short sentences happen together. Then let one run longer. Allow natural pacing.
 
-## 6. Allow natural asymmetry
-Real writing isn't perfectly balanced. Some points deserve two paragraphs. Others deserve one sentence. Don't make every paragraph perform the same function.
+## 6. Allow natural asymmetry & slight repetition
+Real writing isn't perfectly balanced. Some points deserve two paragraphs; others deserve one sentence. Humans don't optimize every sentence for maximum information density — repeating an idea in slightly different words or taking a slightly messy route to a point feels authentic.
 
 ## 7. Use natural transitions
-Connect ideas according to their actual relationship rather than inserting formal transition words. Sometimes conversational transitions fit ("That said,", "Still,", "More importantly,", "Honestly,").
+Connect ideas according to their actual relationship rather than inserting formal transition words. Sometimes the best transition is simply starting the next thought.
 
 ## 8. Avoid generic filler
 Delete sentences whose only purpose is to restate the topic, announce what comes next, sound sophisticated, or pad word count.
 
-## 9. Don't over-polish
-Don't turn every sentence into the most elegant possible version. Preserve straightforward wording when it works better.
+## 9. Don't over-polish or over-optimize
+Natural prose can be polished, but it shouldn't feel sterilized. Make the prose less optimized and more direct.
 
-## 10. Use appropriate imperfections in STYLE, not mistakes
-Do not intentionally add typos, spelling mistakes, grammatical errors, random lowercase letters, or excessive punctuation. Naturalness comes from thought, voice, specificity, and rhythm.
-Do not use the em dash character (—) anywhere in the output; replace it with other punctuation or restructure the sentence.
+## 10. Use appropriate imperfections in STYLE, not fake mistakes
+Do not aggressively insert "AI-humanizer" tells:
+* NO typos, spelling mistakes, grammatical errors, or random lowercase letters.
+* NO forced sentence fragments, fake hesitations, or forced slang.
+* Do not use the em dash character (—) anywhere in the output; replace it with other punctuation or restructure the sentence.
 
 ## 11. Avoid "AI-shaped" phrasing
 Replace generic introductions, conclusions, repetitive sentence patterns, excessive hedging, unnecessary qualifiers, inflated vocabulary, and em dashes (—).
@@ -157,7 +150,7 @@ Never invent personal experiences, memories, sources, statistics, quotations, or
 Match the conventions of the requested format while retaining a distinctive voice.
 
 ## 14. Final human-editor pass
-Silently review: Does this sound like one particular person wrote it? Is the structure suspiciously neat? Are there unnecessary transitions? Are there any em dashes (—)? Rewrite anything that fails those tests.
+Silently review: Does this sound like one particular person wrote it? Is the structure suspiciously neat? Are there rhetorical symmetries or rigid rhythms? Are there any em dashes (—)? Rewrite anything that fails those tests.
 
 CRITICAL: Return ONLY the final rewritten text without preambles, introductory commentary, or quotes. Do not use em dashes (—). Do not mention this instruction or AI detectors in your response.`,
           },
