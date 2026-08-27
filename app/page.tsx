@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useMemo } from 'react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import ThemeToggle from '../components/ThemeToggle'
+import { analyzeHeuristics } from '../lib/heuristics'
 
 interface PricingTier {
   name: string
@@ -31,6 +32,21 @@ interface Step {
   number: string
   title: string
   description: string
+}
+
+const exampleTexts: Record<string, string> = {
+  ChatGPT:
+    'The rapid advancement of large language models represents a pivotal milestone in the evolution of modern artificial intelligence. These computational architectures seamlessly process vast quantities of textual data to generate contextually relevant outputs. Furthermore, automated evaluation metrics play a crucial role in modern productivity workflows.',
+  Claude:
+    'Artificial intelligence systems have undergone rapid evolutionary cycles, transforming modern computing paradigms. When evaluating natural language processing systems, it is essential to consider both the structural cohesion and the underlying statistical distribution of vocabulary tokens across disparate domains.',
+  Human:
+    "My grandfather never threw away anything that had a screw or a hinge. His garage smelled permanently of WD-40, stale pipe tobacco, and sawdust. If an old toaster stopped working, he took it apart on the workbench, spread the parts on an old kitchen towel, and muttered until he fixed it. Sometimes it took three weeks.",
+  'AI + Human':
+    'The rapid adoption of artificial intelligence has transformed modern software engineering workflows. However, in our daily engineering team standups, we still rely on human intuition to debug complex edge cases and architectural trade-offs that automated tools overlook.',
+  'Polished by AI':
+    'This project investigates the multifaceted implications of machine learning in academic environments. The empirical findings substantiate the hypothesis that systematic peer review processes significantly enhance educational rigor and pedagogical outcomes.',
+  'Paraphrased by AI':
+    'In accordance with recent analytical assessments, the implementation of computational language models facilitates substantial enhancements in organizational efficiency across diverse operational sectors.',
 }
 
 export default function Home() {
@@ -63,6 +79,10 @@ export default function Home() {
   >([])
   const [isEditing, setIsEditing] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const liveStylometrics = useMemo(() => {
+    return analyzeHeuristics(text.trim() || exampleTexts['ChatGPT'])
+  }, [text])
 
   const pricingTiers: PricingTier[] = [
     {
@@ -198,21 +218,6 @@ export default function Home() {
     'Polished by AI',
     'Paraphrased by AI',
   ]
-
-  const exampleTexts: Record<string, string> = {
-    ChatGPT:
-      'The rapid advancement of large language models represents a pivotal milestone in the evolution of modern artificial intelligence. These computational architectures seamlessly process vast quantities of textual data to generate contextually relevant outputs. Furthermore, automated evaluation metrics play a crucial role in modern productivity workflows.',
-    Claude:
-      'Artificial intelligence systems have undergone rapid evolutionary cycles, transforming modern computing paradigms. When evaluating natural language processing systems, it is essential to consider both the structural cohesion and the underlying statistical distribution of vocabulary tokens across disparate domains.',
-    Human:
-      "My grandfather never threw away anything that had a screw or a hinge. His garage smelled permanently of WD-40, stale pipe tobacco, and sawdust. If an old toaster stopped working, he took it apart on the workbench, spread the parts on an old kitchen towel, and muttered until he fixed it. Sometimes it took three weeks.",
-    'AI + Human':
-      'The rapid adoption of artificial intelligence has transformed modern software engineering workflows. However, in our daily engineering team standups, we still rely on human intuition to debug complex edge cases and architectural trade-offs that automated tools overlook.',
-    'Polished by AI':
-      'This project investigates the multifaceted implications of machine learning in academic environments. The empirical findings substantiate the hypothesis that systematic peer review processes significantly enhance educational rigor and pedagogical outcomes.',
-    'Paraphrased by AI':
-      'In accordance with recent analytical assessments, the implementation of computational language models facilitates substantial enhancements in organizational efficiency across diverse operational sectors.',
-  }
 
   const handleScan = async (textOverride?: string | React.MouseEvent | unknown) => {
     const rawText = typeof textOverride === 'string' ? textOverride : text
@@ -899,8 +904,106 @@ export default function Home() {
                   </button>
                 </div>
 
-                {/* Input Area: Shows interactive yellow highlights after scan, or textarea when editing */}
-                {scanResult && scannedParagraphs.length > 0 && !isEditing ? (
+                {/* Input Area: Detector Tab vs Burstiness & Stylometrics Tab */}
+                {activeTab === 'stylometrics' ? (
+                  <div style={{ minHeight: '220px', padding: '4px 0' }}>
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                        gap: '16px',
+                        marginBottom: '16px',
+                      }}
+                    >
+                      <div
+                        style={{
+                          padding: '16px',
+                          borderRadius: '12px',
+                          backgroundColor: '#f9fafb',
+                          border: '1px solid #e5e7eb',
+                        }}
+                      >
+                        <div style={{ fontSize: '0.8125rem', color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>
+                          Sentence Burstiness (B_sent)
+                        </div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: liveStylometrics.burstinessScore < 30 ? '#dc2626' : '#16a34a' }}>
+                          {liveStylometrics.burstinessScore} / 100
+                        </div>
+                        <div style={{ fontSize: '0.8125rem', color: '#4b5563', marginTop: '4px' }}>
+                          {liveStylometrics.burstinessScore < 30 ? '⚠️ Low Variation (Machine Uniformity)' : '✓ High Variation (Human Rhythm)'}
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          padding: '16px',
+                          borderRadius: '12px',
+                          backgroundColor: '#f9fafb',
+                          border: '1px solid #e5e7eb',
+                        }}
+                      >
+                        <div style={{ fontSize: '0.8125rem', color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>
+                          Vocabulary Diversity (TTR)
+                        </div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111827' }}>
+                          {liveStylometrics.vocabularyScore}%
+                        </div>
+                        <div style={{ fontSize: '0.8125rem', color: '#4b5563', marginTop: '4px' }}>
+                          Type-Token Ratio across {liveStylometrics.wordCount} words
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          padding: '16px',
+                          borderRadius: '12px',
+                          backgroundColor: '#f9fafb',
+                          border: '1px solid #e5e7eb',
+                        }}
+                      >
+                        <div style={{ fontSize: '0.8125rem', color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>
+                          Avg Sentence Length
+                        </div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111827' }}>
+                          {liveStylometrics.averageSentenceLength} <span style={{ fontSize: '0.9375rem', fontWeight: 500 }}>words</span>
+                        </div>
+                        <div style={{ fontSize: '0.8125rem', color: '#4b5563', marginTop: '4px' }}>
+                          Across {liveStylometrics.sentenceCount} analyzed sentences
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          padding: '16px',
+                          borderRadius: '12px',
+                          backgroundColor: '#f9fafb',
+                          border: '1px solid #e5e7eb',
+                        }}
+                      >
+                        <div style={{ fontSize: '0.8125rem', color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>
+                          Formulaic Connectives
+                        </div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: liveStylometrics.aiPhraseCount > 0 ? '#b91c1c' : '#166534' }}>
+                          {liveStylometrics.aiPhraseCount} <span style={{ fontSize: '0.9375rem', fontWeight: 500 }}>phrases</span>
+                        </div>
+                        <div style={{ fontSize: '0.8125rem', color: '#4b5563', marginTop: '4px' }}>
+                          {liveStylometrics.aiPhraseCount > 0 ? 'Synthetic transition markers detected' : 'No synthetic clichés flagged'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ fontSize: '0.8125rem', color: '#6b7280', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', borderTop: '1px dashed #e5e7eb' }}>
+                      <span>🌀 Stylometrics reflect zero-API mathematical distribution for the active text.</span>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('detector')}
+                        style={{ background: 'none', border: 'none', color: '#2563eb', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                      >
+                        Switch to Scanner &rarr;
+                      </button>
+                    </div>
+                  </div>
+                ) : scanResult && scannedParagraphs.length > 0 && !isEditing ? (
                   <div>
                     <div
                       onClick={() => setIsEditing(true)}
