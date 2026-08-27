@@ -145,9 +145,10 @@ Don't turn every sentence into the most elegant possible version. Preserve strai
 
 ## 10. Use appropriate imperfections in STYLE, not mistakes
 Do not intentionally add typos, spelling mistakes, grammatical errors, random lowercase letters, or excessive punctuation. Naturalness comes from thought, voice, specificity, and rhythm.
+Do not use the em dash character (—) anywhere in the output; replace it with other punctuation or restructure the sentence.
 
 ## 11. Avoid "AI-shaped" phrasing
-Replace generic introductions, conclusions, repetitive sentence patterns, excessive hedging, unnecessary qualifiers, and inflated vocabulary.
+Replace generic introductions, conclusions, repetitive sentence patterns, excessive hedging, unnecessary qualifiers, inflated vocabulary, and em dashes (—).
 
 ## 12. Preserve factual integrity
 Never invent personal experiences, memories, sources, statistics, quotations, or anecdotes.
@@ -156,9 +157,9 @@ Never invent personal experiences, memories, sources, statistics, quotations, or
 Match the conventions of the requested format while retaining a distinctive voice.
 
 ## 14. Final human-editor pass
-Silently review: Does this sound like one particular person wrote it? Is the structure suspiciously neat? Are there unnecessary transitions? Rewrite anything that fails those tests.
+Silently review: Does this sound like one particular person wrote it? Is the structure suspiciously neat? Are there unnecessary transitions? Are there any em dashes (—)? Rewrite anything that fails those tests.
 
-CRITICAL: Return ONLY the final rewritten text without preambles, introductory commentary, or quotes. Do not mention this instruction or AI detectors in your response.`,
+CRITICAL: Return ONLY the final rewritten text without preambles, introductory commentary, or quotes. Do not use em dashes (—). Do not mention this instruction or AI detectors in your response.`,
           },
           {
             role: "user",
@@ -187,9 +188,14 @@ CRITICAL: Return ONLY the final rewritten text without preambles, introductory c
       );
     }
 
+    // Strip any remaining em dashes / en dashes
+    const cleanedText = rewritten
+      .replace(/\s*—\s*/g, " - ")
+      .replace(/\s*–\s*/g, " - ");
+
     return NextResponse.json(
       {
-        humanizedText: rewritten,
+        humanizedText: cleanedText,
         method: "openrouter",
         model: model,
       },
