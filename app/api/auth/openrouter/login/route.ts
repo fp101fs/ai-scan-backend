@@ -11,10 +11,10 @@ export async function GET(req: NextRequest) {
   try {
     const { codeVerifier, codeChallenge } = generatePKCE();
 
-    // Determine base URL
-    const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "localhost:3000";
-    const proto = req.headers.get("x-forwarded-proto") || (host.startsWith("localhost") ? "http" : "https");
-    const baseUrl = process.env.NEXTAUTH_URL || `${proto}://${host}`;
+    // Determine base URL dynamically from request host
+    const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
+    const proto = req.headers.get("x-forwarded-proto") || (host?.startsWith("localhost") ? "http" : "https");
+    const baseUrl = host ? `${proto}://${host}` : (process.env.NEXTAUTH_URL || "https://aidetector.buzz");
 
     const callbackUrl = `${baseUrl}/api/auth/openrouter/callback`;
     const authUrl = getOpenRouterAuthUrl(callbackUrl, codeChallenge);

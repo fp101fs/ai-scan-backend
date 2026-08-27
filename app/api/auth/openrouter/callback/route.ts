@@ -17,9 +17,9 @@ export async function GET(req: NextRequest) {
   const code = url.searchParams.get("code");
   const error = url.searchParams.get("error");
 
-  const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "localhost:3000";
-  const proto = req.headers.get("x-forwarded-proto") || (host.startsWith("localhost") ? "http" : "https");
-  const baseUrl = process.env.NEXTAUTH_URL || `${proto}://${host}`;
+  const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
+  const proto = req.headers.get("x-forwarded-proto") || (host?.startsWith("localhost") ? "http" : "https");
+  const baseUrl = host ? `${proto}://${host}` : (process.env.NEXTAUTH_URL || "https://aidetector.buzz");
 
   if (error || !code) {
     const errorMsg = error || "No authorization code provided";

@@ -130,9 +130,9 @@ export default async function SettingsPage() {
             </p>
 
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
-              <Link href="/api/auth/openrouter/login" className="btn btn-secondary btn-sm">
+              <a href="/api/auth/openrouter/login" className="btn btn-secondary btn-sm">
                 🔄 Re-Authenticate with OpenRouter
-              </Link>
+              </a>
               {keyHash && (
                 <a
                   href={`https://openrouter.ai/keys/${keyHash}`}

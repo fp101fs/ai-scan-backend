@@ -569,7 +569,7 @@ export default function Home() {
                 Dashboard ({user?.name?.split(' ')[0] || 'Account'})
               </Link>
             ) : (
-              <Link
+              <a
                 href="/api/auth/openrouter/login"
                 style={{
                   padding: '7px 16px',
@@ -580,10 +580,11 @@ export default function Home() {
                   background: 'linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #eab308 100%)',
                   boxShadow: '0 3px 10px rgba(217, 119, 6, 0.25)',
                   textDecoration: 'none',
+                  display: 'inline-block',
                 }}
               >
                 Connect OpenRouter
-              </Link>
+              </a>
             )}
 
             {/* Hamburger Icon */}
@@ -1953,7 +1954,7 @@ export default function Home() {
                   </ul>
                 </div>
 
-                <Link
+                <a
                   href={tier.ctaLink}
                   style={{
                     display: 'block',
@@ -1972,7 +1973,7 @@ export default function Home() {
                   }}
                 >
                   {tier.ctaText}
-                </Link>
+                </a>
               </div>
             ))}
           </div>
