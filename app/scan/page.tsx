@@ -142,37 +142,52 @@ export default function ScanPage() {
           const paraText = item.text || rawParagraphs[i] || ''
           const paraScore = Math.round((item.aiProbability ?? 0) * 100)
           
+          const apiSents = item.sentences || []
           const rawSents = paraText.split(/(?<=[.!?])\s+(?=[A-Z0-9"'])/).filter(Boolean)
-          const sents = rawSents.length > 0 ? rawSents : [paraText]
+          const fallbackSents = rawSents.length > 0 ? rawSents : [paraText]
 
-          const parsedSents = sents.map((sText) => {
-            const sWords = countWords(sText)
-            const hasAiCliché = /furthermore|moreover|in conclusion|it is important to note|delve|testament to|tapestry|seamlessly/i.test(sText)
-            let sScore = paraScore
-            if (hasAiCliché) {
-              sScore = Math.min(100, Math.max(85, paraScore + 20))
-              totalAiPhrases += 1
-            } else if (sWords > 25 && paraScore < 30) {
-              sScore = Math.max(0, paraScore - 10)
-            }
-
-            const sentObj = {
-              text: sText,
-              score: sScore,
-              wordCount: sWords,
-              isAiLikely: sScore >= 50,
-              paragraphIndex: i,
-            }
-            allSentencesList.push(sentObj)
-            return sentObj
-          })
+          const parsedSents = apiSents.length > 0
+            ? apiSents.map((sObj: any) => {
+                const sWords = sObj.wordCount || countWords(sObj.text)
+                const sScore = sObj.score ?? paraScore
+                if (sObj.aiPhraseMatches && sObj.aiPhraseMatches.length > 0) {
+                  totalAiPhrases += sObj.aiPhraseMatches.length
+                }
+                const sentObj = {
+                  text: sObj.text,
+                  score: sScore,
+                  wordCount: sWords,
+                  isAiLikely: Boolean(sObj.isAi ?? (sScore >= 50)),
+                  paragraphIndex: i,
+                }
+                allSentencesList.push(sentObj)
+                return sentObj
+              })
+            : fallbackSents.map((sText) => {
+                const sWords = countWords(sText)
+                const hasAiCliché = /furthermore|moreover|in conclusion|it is important to note|delve|testament to|tapestry|seamlessly/i.test(sText)
+                let sScore = paraScore
+                if (hasAiCliché) {
+                  sScore = Math.min(100, Math.max(85, paraScore + 20))
+                  totalAiPhrases += 1
+                }
+                const sentObj = {
+                  text: sText,
+                  score: sScore,
+                  wordCount: sWords,
+                  isAiLikely: sScore >= 50,
+                  paragraphIndex: i,
+                }
+                allSentencesList.push(sentObj)
+                return sentObj
+              })
 
           return {
             text: paraText,
             score: paraScore,
             index: item.index ?? i,
             wordCount: item.wordCount || countWords(paraText),
-            sentenceCount: item.sentenceCount || sents.length,
+            sentenceCount: item.sentenceCount || parsedSents.length,
             perplexityScore: item.perplexityScore ?? 50,
             burstinessScore: item.burstinessScore ?? 50,
             vocabularyScore: item.vocabularyScore ?? 50,

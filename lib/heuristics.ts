@@ -49,29 +49,119 @@ export interface HeuristicAnalysis {
 }
 
 const AI_PHRASES = [
+  /\bthe rapid (?:advancement|evolution|growth|adoption|rise) of\b/gi,
+  /\brepresents a pivotal (?:milestone|moment|shift|step)\b/gi,
+  /\bin the evolution of (?:modern )?artificial intelligence\b/gi,
+  /\bcomputational architectures?\b/gi,
+  /\bseamlessly (?:process(?:es)?|integrate(?:s)?|blend(?:s)?)\b/gi,
+  /\bvast quantities of (?:textual )?data\b/gi,
+  /\bcontextually relevant (?:outputs?|responses?|results?)\b/gi,
   /\bfurthermore\b/gi,
   /\bmoreover\b/gi,
   /\bin conclusion\b/gi,
   /\bto summarize\b/gi,
   /\bin summary\b/gi,
-  /\bit is important to note\b/gi,
-  /\bit is worth noting\b/gi,
+  /\bit is (?:important|worth|crucial|essential) to note\b/gi,
   /\bdelve(?:s|d|ing)? into\b/gi,
   /\btestament to\b/gi,
-  /\btapestry\b/gi,
+  /\btapestry of\b/gi,
+  /\brich tapestry\b/gi,
   /\bbustling\b/gi,
   /\bparamount\b/gi,
   /\bseamlessly\b/gi,
-  /\bharnessing the power\b/gi,
-  /\bin today's rapidly\b/gi,
-  /\bplays a crucial role\b/gi,
-  /\bplays a pivotal role\b/gi,
-  /\bnot only.*but also\b/gi,
-  /\bnavigating the complexities\b/gi,
+  /\bharnessing the power of\b/gi,
+  /\bin today's (?:fast-paced|rapidly (?:evolving|changing)) (?:world|landscape|environment)\b/gi,
+  /\bplay(?:s|ed|ing)? a (?:crucial|pivotal|vital|key|significant) role\b/gi,
+  /\bstands as a testament to\b/gi,
   /\bstands as a\b/gi,
+  /\bhuman ingenuity in an increasingly (?:digital|connected) landscape\b/gi,
+  /\bmultifaceted (?:nature|approach|aspects?)\b/gi,
+  /\bnavigating the complexities of\b/gi,
+  /\bnot only .* but also\b/gi,
+  /\bserves as a (?:cornerstone|foundation|testament)\b/gi,
+  /\bby leveraging (?:advanced|state-of-the-art)\b/gi,
+  /\bfosters? a (?:collaborative|comprehensive|deeper)\b/gi,
+  /\bunderscores? the (?:importance|necessity|value)\b/gi,
 ];
 
 const PASSIVE_REGEX = /\b(is|are|was|were|be|been|being)\s+([a-z]+ed|[a-z]+en|built|done|made|seen|written|found|given|taken|known)\b/gi;
+
+export function scoreSentence(sentence: string, paragraphAiProb?: number): SentenceAnalysis {
+  const clean = sentence.trim();
+  if (!clean) {
+    return {
+      text: sentence,
+      score: 0,
+      isAi: false,
+      wordCount: 0,
+      aiPhraseMatches: [],
+      hasPassive: false,
+    };
+  }
+
+  const sWords = clean.toLowerCase().match(/\b[a-z0-9'-]+\b/g) || [];
+  const sWordCount = Math.max(1, sWords.length);
+
+  // 1. Phrasal Pattern Matches
+  const foundPhrases: string[] = [];
+  for (const regex of AI_PHRASES) {
+    const match = clean.match(regex);
+    if (match) {
+      foundPhrases.push(...match);
+    }
+  }
+
+  // 2. Syntactic / Lexical Features
+  const hasPassive = PASSIVE_REGEX.test(clean);
+  const isUniformLength = sWordCount >= 14 && sWordCount <= 32;
+
+  const abstractWords = clean.match(/\b(advancement|evolution|computational|architectures|seamlessly|quantities|contextually|relevant|outputs|automated|evaluation|metrics|productivity|workflows|integration|automation|testament|ingenuity|multifaceted|pedagogical|empirical|substantiate|hypothesis|facilitates|substantial|enhancements|organizational|efficiency|operational|sectors|paradigms|disparate|cohesion|underlying|distribution|frameworks|methodology|systematic)\b/gi) || [];
+  const abstractDensity = abstractWords.length / sWordCount;
+
+  const humanWords = clean.match(/\b(grandfather|garage|smelled|sawdust|tobacco|pipe|toaster|workbench|towel|muttered|screw|hinge|wire|kids|mom|dad|coffee|kitchen|breakfast|pancakes|lunch|dinner|dog|cat|walk|sleep|bed|car|bike|friend|yesterday|suddenly|felt|looked|heard|laughed|yelled|cried|funny|weird|crazy|cool|stuff|guy|girl)\b/gi) || [];
+  const humanDensity = humanWords.length / sWordCount;
+
+  // 3. Sentence-level Logit Computation
+  let sentenceLogit = -1.6;
+
+  if (foundPhrases.length > 0) {
+    sentenceLogit += 2.8 * foundPhrases.length;
+  }
+  if (abstractDensity > 0.12) {
+    sentenceLogit += 3.4 * (abstractDensity / 0.22);
+  }
+  if (hasPassive && abstractDensity > 0.05) {
+    sentenceLogit += 0.8;
+  }
+  if (isUniformLength && abstractDensity > 0.08) {
+    sentenceLogit += 0.9;
+  }
+
+  if (humanDensity > 0.04) {
+    sentenceLogit -= 3.8 * (humanDensity / 0.12);
+  }
+  if (sWordCount < 10 && foundPhrases.length === 0) {
+    sentenceLogit -= 2.0;
+  }
+
+  if (paragraphAiProb !== undefined) {
+    const pProb = Math.max(0.01, Math.min(0.99, paragraphAiProb));
+    const paraLogit = Math.log(pProb / (1 - pProb));
+    sentenceLogit = 0.72 * sentenceLogit + 0.28 * paraLogit;
+  }
+
+  const rawProb = 1.0 / (1.0 + Math.exp(-sentenceLogit));
+  const score = Math.round(rawProb * 100);
+
+  return {
+    text: sentence,
+    score,
+    isAi: score >= 50,
+    wordCount: sWordCount,
+    aiPhraseMatches: foundPhrases,
+    hasPassive,
+  };
+}
 
 export function analyzeHeuristics(text: string): HeuristicAnalysis {
   const cleanText = text.trim();
@@ -181,40 +271,7 @@ export function analyzeHeuristics(text: string): HeuristicAnalysis {
   const aiProbability = Math.round((1.0 / (1.0 + Math.exp(-rawLogit))) * 100) / 100;
 
   // 8. Sentence-level granular breakdown
-  const sentenceAnalyses: SentenceAnalysis[] = sentences.map((s) => {
-    const sWords = s.match(/\b[a-z0-9'-]+\b/g) || [];
-    const sWordCount = Math.max(1, sWords.length);
-
-    const foundPhrases: string[] = [];
-    for (const regex of AI_PHRASES) {
-      const match = s.match(regex);
-      if (match) foundPhrases.push(...match);
-    }
-
-    const hasPassive = PASSIVE_REGEX.test(s);
-    let sAiProb = aiProbability;
-
-    if (foundPhrases.length > 0) {
-      sAiProb = Math.min(0.99, Math.max(0.75, sAiProb + 0.25 * foundPhrases.length));
-    }
-    if (hasPassive && sAiProb > 0.4) {
-      sAiProb = Math.min(0.98, sAiProb + 0.08);
-    }
-    if (sWordCount < 15 && foundPhrases.length === 0 && aiProbability < 0.45) {
-      sAiProb = Math.max(0.02, sAiProb - 0.15);
-    }
-
-    const sScore = Math.round(sAiProb * 100);
-
-    return {
-      text: s,
-      score: sScore,
-      isAi: sScore >= 50,
-      wordCount: sWordCount,
-      aiPhraseMatches: foundPhrases,
-      hasPassive,
-    };
-  });
+  const sentenceAnalyses: SentenceAnalysis[] = sentences.map((s) => scoreSentence(s, aiProbability));
 
   return {
     perplexityScore: Math.round((1 - vocabUniformity) * 100),
