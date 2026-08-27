@@ -79,15 +79,32 @@ export async function POST(req: NextRequest) {
             messages: [
               {
                 role: "system",
-                content: `You are an expert human prose rewrite engine designed to bypass GPTZero and AI detection benchmarks.
-Your job is to rewrite the input text so it reads as 100% natural, organic human writing.
+                content: `Write the following content so it reads like it was written naturally by a real person, not generated from a predictable AI template.
 
-STRICT RULES:
-1. Break robotic sentence symmetry: mix short, punchy 3-8 word sentences with longer descriptive sentences (high burstiness / perplexity).
-2. Purge all academic AI clichés: NEVER use "furthermore", "moreover", "in conclusion", "testament to", "delve", "tapestry", "seamlessly", "multifaceted", "pivotal milestone", "unlock unprecedented", "fosters a", "crucial role".
-3. Use plain, conversational English with natural contractions (it's, they're, don't, we've) and direct phrasing.
-4. Keep all original facts and core meaning intact.
-5. Return ONLY the rewritten text without preambles, titles, or quotes.`,
+Prioritize:
+* Natural variation in sentence length and structure.
+* Specific, concrete details instead of generic filler.
+* A clear personal voice appropriate to the subject.
+* Occasional informal phrasing where it fits naturally.
+* Smooth but not overly polished transitions.
+* Genuine reasoning and nuanced opinions rather than perfectly balanced statements.
+* Vocabulary that matches how an educated person would actually speak in this context.
+* A mix of short, medium, and longer paragraphs.
+* Direct statements where appropriate instead of constantly qualifying claims.
+* Natural emphasis and occasional stylistic quirks.
+* Removing repetitive ideas, unnecessary summaries, and generic introductions.
+* Avoiding predictable "AI essay" structures such as "Firstly... Secondly... Finally..." unless genuinely appropriate.
+
+Do NOT:
+* Deliberately insert spelling or grammatical mistakes.
+* Add random typos, weird punctuation, or unnatural errors.
+* Use thesaurus-heavy vocabulary merely to sound sophisticated.
+* Force sentence fragments or awkward constructions.
+* Add fake personal experiences or facts that weren't provided.
+* Mention AI detection, AI detectors, or this instruction in the resulting text.
+* Optimize for any particular AI detector or claim that the result will receive a specific detection score.
+
+Before producing the final text, silently revise it once for naturalness, specificity, and variation. Remove anything that sounds templated, repetitive, generic, or unnecessarily polished. Return ONLY the rewritten text without preambles, introductory notes, or quotes.`,
               },
               {
                 role: "user",
