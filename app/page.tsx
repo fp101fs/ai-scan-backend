@@ -214,13 +214,16 @@ export default function Home() {
       'In accordance with recent analytical assessments, the implementation of computational language models facilitates substantial enhancements in organizational efficiency across diverse operational sectors.',
   }
 
-  const handleScan = async () => {
-    if (text.trim().length < 10) {
-      alert('Please enter at least 10 characters to scan.')
+  const handleScan = async (textOverride?: string | React.MouseEvent | unknown) => {
+    const rawText = typeof textOverride === 'string' ? textOverride : text
+    if (rawText.trim().length < 10) {
+      if (typeof textOverride !== 'string') {
+        alert('Please enter at least 10 characters to scan.')
+      }
       return
     }
 
-    const rawParagraphs = text
+    const rawParagraphs = rawText
       .split(/\n\s*\n/)
       .map((p) => p.trim())
       .filter(Boolean)
@@ -387,10 +390,11 @@ export default function Home() {
     if (file) {
       const reader = new FileReader()
       reader.onload = (e) => {
-        setText((e.target?.result as string) || '')
-        setScanResult(null)
-        setScannedParagraphs([])
-        setIsEditing(true)
+        const content = (e.target?.result as string) || ''
+        setText(content)
+        if (content.trim().length >= 10) {
+          handleScan(content)
+        }
       }
       reader.readAsText(file)
     }
@@ -398,13 +402,14 @@ export default function Home() {
 
   const handleExampleClick = (example: string) => {
     setSelectedExample(example)
-    setScanResult(null)
-    setScannedParagraphs([])
-    setIsEditing(true)
-    if (exampleTexts[example]) {
-      setText(exampleTexts[example])
+    const sample = exampleTexts[example]
+    if (sample) {
+      setText(sample)
+      handleScan(sample)
     } else {
-      setText(`Example text showing ${example.toLowerCase()} generated content...`)
+      const fallback = `Example text showing ${example.toLowerCase()} generated content...`
+      setText(fallback)
+      handleScan(fallback)
     }
   }
 
@@ -992,7 +997,14 @@ export default function Home() {
                       if (scanResult) setScanResult(null)
                       if (scannedParagraphs.length > 0) setScannedParagraphs([])
                     }}
-                    placeholder="Paste your essay, article, or document here to check for AI-generated sentences..."
+                    onPaste={(e) => {
+                      const pastedText = e.clipboardData?.getData('text') || ''
+                      if (pastedText.trim().length >= 10) {
+                        setText(pastedText)
+                        handleScan(pastedText)
+                      }
+                    }}
+                    placeholder="Paste your essay, article, or document here to instantly scan for AI-generated sentences..."
                     style={{
                       width: '100%',
                       minHeight: '220px',
