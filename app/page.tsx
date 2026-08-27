@@ -281,6 +281,7 @@ export default function Home() {
     setIsScanning(true)
     setScanResult(null)
     setScannedParagraphs([])
+    setIsEditing(false)
 
     try {
       const payloadParagraphs = rawParagraphs.map((p, i) => ({
@@ -294,8 +295,7 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           paragraphs: payloadParagraphs,
-          mode: 'hybrid',
-          model: 'openai/gpt-4o-mini',
+          mode: 'heuristic',
         }),
       })
 
@@ -451,6 +451,9 @@ export default function Home() {
   const handleExampleClick = (example: string) => {
     setSelectedExample(example)
     const sample = exampleTexts[example]
+    setIsEditing(false)
+    setScanResult(null)
+    setScannedParagraphs([])
     if (sample) {
       setText(sample)
       handleScan(sample)
@@ -937,6 +940,9 @@ export default function Home() {
                         onClick={() => {
                           setText(exampleTexts['ChatGPT'])
                           setScanResult(null)
+                          setScannedParagraphs([])
+                          setIsEditing(false)
+                          handleScan(exampleTexts['ChatGPT'])
                         }}
                         style={{
                           display: 'inline-flex',
@@ -954,6 +960,33 @@ export default function Home() {
                       >
                         <span>⚡</span> Sample Essay
                       </button>
+
+                      {text && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setText('')
+                            setScanResult(null)
+                            setScannedParagraphs([])
+                            setIsEditing(true)
+                          }}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '6px 12px',
+                            borderRadius: '9999px',
+                            backgroundColor: '#fee2e2',
+                            border: '1px solid #fca5a5',
+                            color: '#991b1b',
+                            fontSize: '0.8125rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          🗑️ Clear
+                        </button>
+                      )}
                     </div>
 
                     {scanResult && scannedParagraphs.length > 0 && !isEditing ? (
@@ -1601,6 +1634,9 @@ export default function Home() {
                             onClick={() => {
                               setText(humanizedOutput)
                               setActiveTab('detector')
+                              setIsEditing(false)
+                              setScanResult(null)
+                              setScannedParagraphs([])
                               handleScan(humanizedOutput)
                             }}
                             style={{
