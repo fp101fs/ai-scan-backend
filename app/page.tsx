@@ -4,7 +4,7 @@ import React, { useState, useRef, useMemo } from 'react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import ThemeToggle from '../components/ThemeToggle'
-import { analyzeHeuristics } from '../lib/heuristics'
+import { analyzeHeuristics, advancedHeuristicHumanize } from '../lib/heuristics'
 
 interface PricingTier {
   name: string
@@ -113,23 +113,12 @@ export default function Home() {
         setHumanizedOutput(data.humanizedText || '')
         setHumanizeMethod(data.method || 'heuristic')
       } else {
-        // Simple fallback
-        const fallback = targetText
-          .replace(/\bFurthermore,\s*/gi, "Also, ")
-          .replace(/\bMoreover,\s*/gi, "On top of that, ")
-          .replace(/\bIn conclusion,\s*/gi, "All in all, ")
-          .replace(/\bseamlessly\s*/gi, "smoothly ")
-          .replace(/\bdelve into\s*/gi, "explore ")
+        const fallback = advancedHeuristicHumanize(targetText)
         setHumanizedOutput(fallback)
         setHumanizeMethod('heuristic')
       }
     } catch {
-      const fallback = targetText
-        .replace(/\bFurthermore,\s*/gi, "Also, ")
-        .replace(/\bMoreover,\s*/gi, "On top of that, ")
-        .replace(/\bIn conclusion,\s*/gi, "All in all, ")
-        .replace(/\bseamlessly\s*/gi, "smoothly ")
-        .replace(/\bdelve into\s*/gi, "explore ")
+      const fallback = advancedHeuristicHumanize(targetText)
       setHumanizedOutput(fallback)
       setHumanizeMethod('heuristic')
     } finally {

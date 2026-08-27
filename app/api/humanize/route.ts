@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth/next";
 import { decode } from "next-auth/jwt";
 import { authOptions } from "../../../auth";
 import { NextRequest, NextResponse } from "next/server";
+import { advancedHeuristicHumanize } from "../../../lib/heuristics";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
@@ -15,65 +16,40 @@ export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
 
-function heuristicHumanize(inputText: string): string {
-  if (!inputText || inputText.trim().length === 0) return "";
-
-  const replacements: [RegExp, string][] = [
-    [/\bFurthermore,\s*/gi, "Also, "],
-    [/\bMoreover,\s*/gi, "On top of that, "],
-    [/\bIn conclusion,\s*/gi, "All in all, "],
-    [/\bIt is important to note that\s*/gi, "Keep in mind that "],
-    [/\bIt should be noted that\s*/gi, "Noticeably, "],
-    [/\bstands as a testament to\s*/gi, "proves "],
-    [/\bserves as a testament to\s*/gi, "reflects "],
-    [/\bdelve into\s*/gi, "look closely at "],
-    [/\bdelves into\s*/gi, "looks into "],
-    [/\bmultifaceted\s*/gi, "complex "],
-    [/\bseamlessly\s*/gi, "smoothly "],
-    [/\btapestry of\s*/gi, "mix of "],
-    [/\bpivotal milestone\s*/gi, "key step "],
-    [/\bcomputational architectures\s*/gi, "computing systems "],
-    [/\bfacilitates substantial enhancements in\s*/gi, "substantially boosts "],
-    [/\bIn accordance with recent analytical assessments,\s*/gi, "Based on recent findings, "],
-    [/\butilize\s*/gi, "use "],
-    [/\butilizes\s*/gi, "uses "],
-    [/\butilizing\s*/gi, "using "],
-  ];
-
-  let result = inputText;
-  for (const [pattern, rep] of replacements) {
-    result = result.replace(pattern, rep);
-  }
-
-  return result;
-}
-
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    const authHeader = req.headers.get("authorization");
+    let effectiveApiKey: string | undefined = process.env.OPENROUTER_API_KEY;
     const customKeyHeader = req.headers.get("x-openrouter-key");
+    const authHeader = req.headers.get("authorization");
 
-    let sessionUser = session?.user as any;
-    let effectiveApiKey =
-      customKeyHeader ||
-      sessionUser?.openRouterKey ||
-      process.env.OPENROUTER_API_KEY;
-
-    if (!effectiveApiKey && authHeader?.startsWith("Bearer ")) {
-      const tokenString = authHeader.replace("Bearer ", "").trim();
-      const secret =
-        process.env.AUTH_SECRET ||
-        process.env.NEXTAUTH_SECRET ||
-        "ai-scan-secret-production-key-9284102941";
-
+    if (customKeyHeader) {
+      effectiveApiKey = customKeyHeader;
+    } else {
       try {
-        const decoded = await decode({ token: tokenString, secret });
-        if (decoded?.openRouterKey) {
-          effectiveApiKey = decoded.openRouterKey as string;
+        const session = await getServerSession(authOptions);
+        const sessionUser = session?.user as any;
+        if (sessionUser?.openRouterKey) {
+          effectiveApiKey = sessionUser.openRouterKey;
         }
       } catch {
-        // fallback
+        // Ignore session extraction failure
+      }
+
+      if (!effectiveApiKey && authHeader?.startsWith("Bearer ")) {
+        const tokenString = authHeader.replace("Bearer ", "").trim();
+        const secret =
+          process.env.AUTH_SECRET ||
+          process.env.NEXTAUTH_SECRET ||
+          "ai-scan-secret-production-key-9284102941";
+
+        try {
+          const decoded = await decode({ token: tokenString, secret });
+          if (decoded?.openRouterKey) {
+            effectiveApiKey = decoded.openRouterKey as string;
+          }
+        } catch {
+          // fallback
+        }
       }
     }
 
@@ -99,11 +75,19 @@ export async function POST(req: NextRequest) {
           },
           body: JSON.stringify({
             model: model,
-            temperature: 0.85,
+            temperature: 0.88,
             messages: [
               {
                 role: "system",
-                content: `You are an expert human prose rewrite engine. Rewrite the input text so it sounds authentic, natural, and human-written while keeping all core facts and meaning. Break repetitive cadence, eliminate synthetic AI cliché markers (e.g. furthermore, moreover, delve, tapestry, testament to), and increase sentence length variance. Return ONLY the rewritten text without preambles or notes.`,
+                content: `You are an expert human prose rewrite engine designed to bypass GPTZero and AI detection benchmarks.
+Your job is to rewrite the input text so it reads as 100% natural, organic human writing.
+
+STRICT RULES:
+1. Break robotic sentence symmetry: mix short, punchy 3-8 word sentences with longer descriptive sentences (high burstiness / perplexity).
+2. Purge all academic AI clichés: NEVER use "furthermore", "moreover", "in conclusion", "testament to", "delve", "tapestry", "seamlessly", "multifaceted", "pivotal milestone", "unlock unprecedented", "fosters a", "crucial role".
+3. Use plain, conversational English with natural contractions (it's, they're, don't, we've) and direct phrasing.
+4. Keep all original facts and core meaning intact.
+5. Return ONLY the rewritten text without preambles, titles, or quotes.`,
               },
               {
                 role: "user",
@@ -132,7 +116,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const fallbackText = heuristicHumanize(text);
+    // Heuristic Humanizer fallback
+    const fallbackText = advancedHeuristicHumanize(text);
     return NextResponse.json(
       {
         humanizedText: fallbackText,
