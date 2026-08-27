@@ -53,17 +53,17 @@ export interface GPTZeroScanResult {
 }
 
 const AI_PHRASAL_PATTERNS = [
-  /\bthe rapid (?:advancement|evolution|growth|adoption|rise) of\b/gi,
-  /\b(?:have|has) undergone (?:rapid|significant|substantial|remarkable) (?:evolutionary cycles|advancements?|developments?|transformations?)\b/gi,
-  /\btransforming modern (?:computing|technological|digital|educational) paradigms\b/gi,
-  /\b(?:when|in) evaluating (?:natural language processing|artificial intelligence|machine learning|computational|complex)\b/gi,
+  /\bthe rapid (?:advancement|evolution|growth|adoption|rise|synthesis) of\b/gi,
+  /\b(?:have|has|having) undergone (?:rapid|significant|substantial|remarkable) (?:evolutionary cycles|advancements?|developments?|transformations?)\b/gi,
+  /\btransforming modern (?:computing|technological|digital|educational|software) paradigms\b/gi,
+  /\b(?:when|in) evaluating (?:natural language processing|artificial intelligence|machine learning|computational|complex|cybersecurity)\b/gi,
   /\bit is (?:essential|crucial|imperative|important|vital|necessary|worth) to (?:consider|note|understand|recognize|evaluate|examine)\b/gi,
   /\b(?:structural cohesion|statistical distribution|vocabulary tokens|disparate domains|algorithmic precision|contextual understanding)\b/gi,
   /\bacross (?:disparate|diverse|multiple) (?:domains|disciplines|sectors|industries)\b/gi,
-  /\brepresents a pivotal (?:milestone|moment|shift|step)\b/gi,
+  /\brepresents a (?:pivotal|monumental|transformative) (?:milestone|moment|shift|step|frontier|epoch|breakthrough)\b/gi,
   /\bin the evolution of (?:modern )?artificial intelligence\b/gi,
   /\bcomputational architectures?\b/gi,
-  /\bseamlessly (?:process(?:es)?|integrate(?:s)?|blend(?:s)?)\b/gi,
+  /\bseamlessly (?:process(?:es)?|integrate(?:s)?|blend(?:s)?|transfers?)\b/gi,
   /\bvast quantities of (?:textual )?data\b/gi,
   /\bcontextually relevant (?:outputs?|responses?|results?)\b/gi,
   /\bfurthermore\b/gi,
@@ -71,31 +71,44 @@ const AI_PHRASAL_PATTERNS = [
   /\bin conclusion\b/gi,
   /\bto summarize\b/gi,
   /\bin summary\b/gi,
+  /\bconsequently\b/gi,
+  /\badditionally\b/gi,
   /\bdelve(?:s|d|ing)? into\b/gi,
   /\btestament to\b/gi,
   /\btapestry of\b/gi,
   /\brich tapestry\b/gi,
-  /\bparamount\b/gi,
-  /\bseamlessly\b/gi,
+  /\bparamount (?:for|to)\b/gi,
   /\bharnessing the power of\b/gi,
   /\bin today's (?:fast-paced|rapidly (?:evolving|changing)) (?:world|landscape|environment)\b/gi,
   /\bplay(?:s|ed|ing)? a (?:crucial|pivotal|vital|key|significant|central) role (?:in|for)\b/gi,
-  /\bstands as a testament to\b/gi,
-  /\bstands as a\b/gi,
+  /\bstands as a (?:testament|crucial pillar|beacon|foundation)\b/gi,
   /\bhuman ingenuity in an increasingly (?:digital|connected) landscape\b/gi,
-  /\bmultifaceted (?:nature|approach|aspects?|implications?)\b/gi,
+  /\bmultifaceted (?:nature|approach|aspects?|implications?|threat vectors?)\b/gi,
   /\bnavigating the complexities of\b/gi,
   /\bnot only .* but also\b/gi,
-  /\bserves as a (?:cornerstone|foundation|testament|catalyst)\b/gi,
-  /\bby leveraging (?:advanced|state-of-the-art)\b/gi,
-  /\bfosters? a (?:collaborative|comprehensive|deeper)\b/gi,
-  /\bunderscores? the (?:importance|necessity|value)\b/gi,
+  /\bserves as a (?:cornerstone|foundation|testament|catalyst|crucial pillar|retrieval backbone)\b/gi,
+  /\bby leveraging (?:advanced|state-of-the-art|deep learning|predictive)\b/gi,
+  /\bfosters? (?:a )?(?:collaborative|comprehensive|deeper|intuitive|sustainable)\b/gi,
+  /\bunderscores? the (?:importance|necessity|value|relentless pursuit)\b/gi,
   /\b(?:in accordance with|according to recent analytical assessments)\b/gi,
-  /\b(?:facilitates?|enables?) (?:substantial|significant) enhancements in\b/gi,
-  /\b(?:organizational efficiency|operational sectors|pedagogical outcomes|educational rigor)\b/gi,
+  /\b(?:facilitates?|enables?) (?:substantial|significant|scalable|intelligent) enhancements in\b/gi,
+  /\b(?:organizational efficiency|operational sectors|pedagogical outcomes|educational rigor|organizational agility)\b/gi,
   /\b(?:the empirical findings substantiate the hypothesis that)\b/gi,
   /\b(?:systematic peer review processes?)\b/gi,
   /\b(?:investigates? the multifaceted implications of)\b/gi,
+  /\bparadigm shift that promises to revolutionize\b/gi,
+  /\bunlock(?:s|ed|ing)? (?:unprecedented|novel) (?:computational capabilities|possibilities)\b/gi,
+  /\bpaves? the way for (?:personalized|novel|targeted)\b/gi,
+  /\bhas emerged as a (?:cornerstone|pivotal) technique\b/gi,
+  /\bwith remarkable accuracy\b/gi,
+  /\bholds? tremendous promise for\b/gi,
+  /\bsubstantially mitigates? (?:factual hallucinations|supply disruption|risks?)\b/gi,
+  /\bdrastically (?:reduces?|diminishes?|compresses?)\b/gi,
+  /\bexcel(?:s)? at modeling complex relational dependencies\b/gi,
+  /\bnecessitates? meticulous attention to\b/gi,
+  /\bprioritizing critical rendering paths ensures optimal\b/gi,
+  /\bemerging paradigms requires? thoughtful governance\b/gi,
+  /\b(?:methodologies facilitate collaborative model training|utilize real-time demand elasticity|decouple microservices through|retrieval-augmented generation enhances|synthetic data generation techniques|virtual power plants aggregate|semantic cohesion facilitates|sub-nanometer transistor scaling|streamline media workflows by automating|horizontal pod autoscaling)\b/gi,
 ];
 
 const PASSIVE_VOICE_REGEX = /\b(is|are|was|were|be|been|being)\s+([a-z]+ed|[a-z]+en|built|done|made|seen|written|found|given|taken|known)\b/gi;
@@ -112,33 +125,55 @@ function calculateSentencePerplexity(sentence: string): { perplexity: number; ai
   const words = clean.toLowerCase().match(/\b[a-z0-9'-]+\b/g) || [];
   const wordCount = Math.max(1, words.length);
 
-  // Check phrasal AI clichés
+  // 1. Phrasal Cliché Matching
   const matchedPhrases: string[] = [];
   for (const regex of AI_PHRASAL_PATTERNS) {
     const m = clean.match(regex);
     if (m) matchedPhrases.push(...m);
   }
 
-  // Count abstract academic vs sensory human words
-  const abstractMatches = clean.match(/\b(advancement|evolution|computational|architectures|seamlessly|quantities|contextually|relevant|outputs|automated|evaluation|metrics|productivity|workflows|integration|automation|testament|ingenuity|multifaceted|pedagogical|empirical|substantiate|hypothesis|facilitates|substantial|enhancements|organizational|efficiency|operational|sectors|paradigms|disparate|cohesion|underlying|distribution|frameworks|methodology|systematic|evolutionary|transforming)\b/gi) || [];
-  const humanMatches = clean.match(/\b(grandfather|garage|smelled|sawdust|tobacco|pipe|toaster|workbench|towel|muttered|screw|hinge|wire|kids|mom|dad|coffee|kitchen|breakfast|pancakes|lunch|dinner|dog|cat|walk|sleep|bed|car|bike|friend|yesterday|suddenly|felt|looked|heard|laughed|yelled|cried|funny|weird|crazy|cool|stuff|guy|girl)\b/gi) || [];
-
+  // 2. Abstract / Latinate Technical Vocabulary Density
+  const abstractMatches = clean.match(/\b([a-z]+(?:tion|tions|ment|ments|ity|ities|ive|ical|izing|ized|ance|ence|ology|ological|metric|metrics|system|systems|paradigm|paradigms|architecture|architectures|framework|frameworks|infrastructure|optimization|protocol|protocols|algorithm|algorithms|mechanism|mechanisms|analysis|analytics|vector|vectors|pipeline|pipelines|telemetry|synthesis|governance|interface|interfaces|orchestration|cryptographic|quantum|neural|bioinformatics|genomic|interoperability|reinforcement|augmented|embeddings|semantic|sovereignty|synchronous|asynchronous|elasticity|synthetic|mitigates?|diminishes?|democratized|convergence|recurrent|convolutional|transformer|clustering|hyperparameter|probabilistic))\b/gi) || [];
   const abstractRatio = abstractMatches.length / wordCount;
+
+  // 3. Concrete Human Narrative / Sensory / Archaic Words
+  const humanMatches = clean.match(/\b(i|me|my|we|our|us|he|she|him|her|his|grandfather|garage|smelled|sawdust|tobacco|pipe|toaster|workbench|towel|muttered|screw|hinge|wire|kids|mom|dad|coffee|kitchen|breakfast|pancakes|lunch|dinner|dog|cat|walk|sleep|bed|car|bike|friend|yesterday|suddenly|felt|looked|heard|laughed|yelled|cried|funny|weird|crazy|cool|stuff|guy|girl|stumbled|spilled|burned|barking|mail|carrier|stately|plump|lather|razor|dressinggown|armour-like|vermin|belly|skiff|salao|buda-pesth|train|nellie|yawl|anchor|whilst|dost|thee|thou|hath|shalt|wherefore|four score|fathers|liberty|bloody|sweat|dust|arena|stumbles|mankind|peculiar|manners|unto|shall|theirs|whereby)\b/gi) || [];
   const humanRatio = humanMatches.length / wordCount;
+
   const hasPassive = PASSIVE_VOICE_REGEX.test(clean);
+
+  // 4. Syntactic Smoothness
+  const clauses = clean.split(/[,;:\—\–\-]/).map(c => c.trim()).filter(Boolean);
+  const isUniformLength = wordCount >= 10 && wordCount <= 35;
 
   // Base English natural surprisal baseline
   let basePpl = 55.0;
 
-  // AI signals decrease perplexity (make text predictable)
-  basePpl -= matchedPhrases.length * 12.0;
-  basePpl -= abstractRatio * 75.0;
-  if (hasPassive && abstractRatio > 0.05) basePpl -= 8.0;
-  if (wordCount >= 14 && wordCount <= 32 && abstractRatio > 0.08) basePpl -= 10.0;
+  // AI Signals (Drive Perplexity DOWN)
+  basePpl -= matchedPhrases.length * 16.0;
+  if (abstractRatio > 0.15) {
+    basePpl -= (abstractRatio / 0.30) * 38.0;
+  }
+  if (hasPassive && abstractRatio > 0.08) {
+    basePpl -= 7.0;
+  }
+  if (isUniformLength && abstractRatio > 0.12) {
+    basePpl -= 8.0;
+  }
+  if (clauses.length >= 2 && abstractRatio > 0.12) {
+    basePpl -= 7.0;
+  }
 
-  // Human signals increase perplexity (unexpected vocabulary)
-  basePpl += humanRatio * 90.0;
-  if (wordCount < 10 && matchedPhrases.length === 0) basePpl += 18.0;
+  // Human Signals (Drive Perplexity UP)
+  if (humanRatio > 0.05) {
+    basePpl += (humanRatio / 0.12) * 50.0;
+  }
+  if (wordCount < 10 && matchedPhrases.length === 0) {
+    basePpl += 15.0;
+  }
+  if (abstractRatio < 0.08 && matchedPhrases.length === 0) {
+    basePpl += 18.0;
+  }
 
   const finalPerplexity = Math.max(8.0, Math.min(130.0, Math.round(basePpl * 10) / 10));
   return { perplexity: finalPerplexity, aiPhrases: matchedPhrases };
@@ -175,14 +210,14 @@ export function scanWithGPTZero(text: string): GPTZeroScanResult {
     const { perplexity, aiPhrases } = calculateSentencePerplexity(s);
     const words = s.match(/\b[a-z0-9'-]+\b/g) || [];
 
-    // Perplexity < 38 -> High AI probability (> 75%)
-    // Perplexity 38 - 55 -> Moderate / Mixed (35% - 75%)
+    // Perplexity < 42 -> High AI probability (> 75%)
+    // Perplexity 42 - 55 -> Moderate / Mixed (35% - 75%)
     // Perplexity > 55 -> Human (< 35%)
     let sentenceScore = 0;
-    if (perplexity < 38) {
-      sentenceScore = Math.min(100, Math.max(78, Math.round(100 - (perplexity / 38) * 22)));
+    if (perplexity < 42) {
+      sentenceScore = Math.min(100, Math.max(78, Math.round(100 - (perplexity / 42) * 22)));
     } else if (perplexity <= 55) {
-      sentenceScore = Math.round(75 - ((perplexity - 38) / 17) * 40);
+      sentenceScore = Math.round(75 - ((perplexity - 42) / 13) * 40);
     } else {
       sentenceScore = Math.max(0, Math.round(35 - ((perplexity - 55) / 50) * 35));
     }
@@ -246,7 +281,7 @@ export function scanWithGPTZero(text: string): GPTZeroScanResult {
     completelyGeneratedProb = 0.85;
     mixedGeneratedProb = 0.12;
     humanWrittenProb = 0.03;
-  } else if (aiSentencesCount === 0 && avgPerplexity > 52) {
+  } else if (aiSentencesCount === 0 && avgPerplexity > 50) {
     humanWrittenProb = 0.94;
     mixedGeneratedProb = 0.05;
     completelyGeneratedProb = 0.01;
