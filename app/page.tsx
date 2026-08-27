@@ -103,7 +103,10 @@ export default function Home() {
       const res = await fetch('/api/humanize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: targetText }),
+        body: JSON.stringify({
+          text: targetText,
+          model: 'deepseek/deepseek-v4-flash-0731',
+        }),
       })
       if (res.ok) {
         const data = await res.json()
@@ -1557,7 +1560,7 @@ export default function Home() {
                             ✓ Humanized Output
                           </span>
                           <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '9999px', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: 600 }}>
-                            {humanizeMethod === 'openrouter' ? 'Multi-Model Rewriter' : 'Heuristic Entropy Flow'}
+                            {humanizeMethod === 'openrouter' ? 'DeepSeek V4 Flash' : 'Heuristic Entropy Flow'}
                           </span>
                         </div>
 

@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { text } = body;
+    const { text, model = "deepseek/deepseek-v4-flash-0731" } = body;
 
     if (!text || typeof text !== "string" || text.trim().length < 5) {
       return NextResponse.json(
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
             "X-Title": "AIDetector.buzz Humanizer",
           },
           body: JSON.stringify({
-            model: "openai/gpt-4o-mini",
+            model: model,
             temperature: 0.85,
             messages: [
               {
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
               {
                 humanizedText: rewritten,
                 method: "openrouter",
-                model: "openai/gpt-4o-mini",
+                model: model,
               },
               { headers: corsHeaders }
             );
