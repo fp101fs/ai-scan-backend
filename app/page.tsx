@@ -4,7 +4,7 @@ import React, { useState, useRef, useMemo } from 'react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import ThemeToggle from '../components/ThemeToggle'
-import { analyzeHeuristics, advancedHeuristicHumanize } from '../lib/heuristics'
+import { analyzeHeuristics } from '../lib/heuristics'
 
 interface PricingTier {
   name: string
@@ -92,6 +92,8 @@ export default function Home() {
     return analyzeHeuristics(text.trim() || exampleTexts['ChatGPT'])
   }, [text])
 
+  const [humanizeError, setHumanizeError] = useState<string | null>(null)
+
   const handleHumanize = async () => {
     const targetText = humanizeInput.trim() || text.trim()
     if (targetText.length < 10) {
@@ -99,6 +101,9 @@ export default function Home() {
       return
     }
     setIsHumanizing(true)
+    setHumanizeError(null)
+    setHumanizedOutput(null)
+
     try {
       const res = await fetch('/api/humanize', {
         method: 'POST',
@@ -108,19 +113,15 @@ export default function Home() {
           model: 'deepseek/deepseek-v4-flash-0731',
         }),
       })
-      if (res.ok) {
-        const data = await res.json()
-        setHumanizedOutput(data.humanizedText || '')
-        setHumanizeMethod(data.method || 'heuristic')
+      const data = await res.json()
+      if (res.ok && data.humanizedText) {
+        setHumanizedOutput(data.humanizedText)
+        setHumanizeMethod(data.method || 'openrouter')
       } else {
-        const fallback = advancedHeuristicHumanize(targetText)
-        setHumanizedOutput(fallback)
-        setHumanizeMethod('heuristic')
+        setHumanizeError(data.error || 'Failed to humanize text via OpenRouter.')
       }
-    } catch {
-      const fallback = advancedHeuristicHumanize(targetText)
-      setHumanizedOutput(fallback)
-      setHumanizeMethod('heuristic')
+    } catch (err: any) {
+      setHumanizeError(err?.message || 'Failed to connect to humanize API.')
     } finally {
       setIsHumanizing(false)
     }
@@ -1524,6 +1525,25 @@ export default function Home() {
                     </button>
                   </div>
 
+                  {/* Error Box */}
+                  {humanizeError && (
+                    <div
+                      style={{
+                        marginTop: '16px',
+                        padding: '14px 16px',
+                        borderRadius: '12px',
+                        backgroundColor: '#fef2f2',
+                        border: '1px solid #fca5a5',
+                        color: '#991b1b',
+                        fontSize: '0.875rem',
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      <strong style={{ display: 'block', marginBottom: '4px' }}>⚠️ Humanizer Error</strong>
+                      {humanizeError}
+                    </div>
+                  )}
+
                   {/* Humanized Output Box */}
                   {humanizedOutput && (
                     <div
@@ -1549,8 +1569,8 @@ export default function Home() {
                           <span style={{ fontSize: '13px', fontWeight: 700, color: '#166534' }}>
                             ✓ Humanized Output
                           </span>
-                          <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '9999px', backgroundColor: humanizeMethod === 'openrouter' ? '#dcfce7' : '#fef3c7', color: humanizeMethod === 'openrouter' ? '#15803d' : '#92400e', fontWeight: 600 }}>
-                            {humanizeMethod === 'openrouter' ? '⚡ DeepSeek V4 Flash (OpenRouter)' : '🌀 Heuristic Flow'}
+                          <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '9999px', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: 600 }}>
+                            ⚡ DeepSeek V4 Flash (OpenRouter)
                           </span>
                         </div>
 

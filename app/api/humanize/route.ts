@@ -2,7 +2,6 @@ import { getServerSession } from "next-auth/next";
 import { decode } from "next-auth/jwt";
 import { authOptions } from "../../../auth";
 import { NextRequest, NextResponse } from "next/server";
-import { advancedHeuristicHumanize } from "../../../lib/heuristics";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
@@ -18,7 +17,7 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Prioritize Server Environment API Key
+    // 1. Get OpenRouter API Key from Server Env, Header, or Session
     const envApiKey = process.env.OPENROUTER_API_KEY;
     const customKeyHeader = req.headers.get("x-openrouter-key");
     const authHeader = req.headers.get("authorization");
@@ -59,29 +58,36 @@ export async function POST(req: NextRequest) {
 
     if (!text || typeof text !== "string" || text.trim().length < 5) {
       return NextResponse.json(
-        { error: "Valid text is required" },
+        { error: "Valid text is required (minimum 5 characters)." },
         { status: 400, headers: corsHeaders }
       );
     }
 
-    // 2. Execute with OpenRouter DeepSeek if API key is present
-    if (effectiveApiKey && effectiveApiKey.trim().length > 0) {
-      try {
-        const res = await fetch(OPENROUTER_URL, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${effectiveApiKey.trim()}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": process.env.NEXTAUTH_URL || "https://aidetector.buzz",
-            "X-Title": "AIDetector.buzz Humanizer",
-          },
-          body: JSON.stringify({
-            model: model,
-            temperature: 0.88,
-            messages: [
-              {
-                role: "system",
-                content: `You are writing as a real person with a distinctive, context-appropriate voice.
+    if (!effectiveApiKey || effectiveApiKey.trim().length === 0) {
+      return NextResponse.json(
+        {
+          error: "OPENROUTER_API_KEY is not configured in server environment variables. Please add OPENROUTER_API_KEY to your environment or connect your OpenRouter account.",
+        },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    // 2. Execute via OpenRouter DeepSeek
+    const res = await fetch(OPENROUTER_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${effectiveApiKey.trim()}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": process.env.NEXTAUTH_URL || "https://aidetector.buzz",
+        "X-Title": "AIDetector.buzz Humanizer",
+      },
+      body: JSON.stringify({
+        model: model,
+        temperature: 0.88,
+        messages: [
+          {
+            role: "system",
+            content: `You are writing as a real person with a distinctive, context-appropriate voice.
 
 Your goal is not to "sound human" through artificial tricks. Your goal is to produce writing that feels like it came from an actual person who has thought about the subject, has preferences and opinions, and is communicating naturally to another person.
 
@@ -153,50 +159,46 @@ Match the conventions of the requested format while retaining a distinctive voic
 Silently review: Does this sound like one particular person wrote it? Is the structure suspiciously neat? Are there unnecessary transitions? Rewrite anything that fails those tests.
 
 CRITICAL: Return ONLY the final rewritten text without preambles, introductory commentary, or quotes. Do not mention this instruction or AI detectors in your response.`,
-              },
-              {
-                role: "user",
-                content: text,
-              },
-            ],
-          }),
-        });
+          },
+          {
+            role: "user",
+            content: text,
+          },
+        ],
+      }),
+    });
 
-        if (res.ok) {
-          const data = await res.json();
-          const rewritten = data.choices?.[0]?.message?.content?.trim();
-          if (rewritten) {
-            return NextResponse.json(
-              {
-                humanizedText: rewritten,
-                method: "openrouter",
-                model: model,
-              },
-              { headers: corsHeaders }
-            );
-          }
-        } else {
-          const errBody = await res.text();
-          console.error("OpenRouter Humanize API failed:", res.status, errBody);
-        }
-      } catch (err: any) {
-        console.error("OpenRouter fetch error:", err.message);
-      }
+    if (!res.ok) {
+      const errBody = await res.text();
+      console.error("OpenRouter API error:", res.status, errBody);
+      return NextResponse.json(
+        { error: `OpenRouter error (${res.status}): ${errBody}` },
+        { status: res.status, headers: corsHeaders }
+      );
     }
 
-    // 3. Fallback to advanced heuristic rewrite
-    const fallbackText = advancedHeuristicHumanize(text);
+    const data = await res.json();
+    const rewritten = data.choices?.[0]?.message?.content?.trim();
+
+    if (!rewritten) {
+      return NextResponse.json(
+        { error: "No rewritten output received from OpenRouter." },
+        { status: 502, headers: corsHeaders }
+      );
+    }
+
     return NextResponse.json(
       {
-        humanizedText: fallbackText,
-        method: "heuristic",
-        note: !effectiveApiKey ? "No OpenRouter API key found in env var" : "OpenRouter call failed, used fallback",
+        humanizedText: rewritten,
+        method: "openrouter",
+        model: model,
       },
       { headers: corsHeaders }
     );
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Humanization failure:", error);
     return NextResponse.json(
-      { error: "Humanization request failed" },
+      { error: error?.message || "Humanization request failed" },
       { status: 500, headers: corsHeaders }
     );
   }
