@@ -257,7 +257,18 @@ export default function ScanPage() {
   return (
     <div className="container" style={{ paddingTop: 36, paddingBottom: 80 }}>
       {/* Header */}
-      <header style={{ marginBottom: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+      <header
+        style={{
+          marginBottom: 28,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 16,
+          position: 'relative',
+          zIndex: 30,
+        }}
+      >
         <div>
           <Link href="/" className="text-link" style={{ fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
             &larr; Back to Home
@@ -273,19 +284,23 @@ export default function ScanPage() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <Link href="/comparison" className="btn btn-secondary btn-sm">
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', position: 'relative', zIndex: 30 }}>
+          <Link href="/comparison" className="btn btn-secondary btn-sm" style={{ cursor: 'pointer' }}>
             Comparison vs GPTZero
           </Link>
           <ThemeToggle />
           {session?.user ? (
-            <Link href="/dashboard" className="btn btn-secondary btn-sm">
+            <Link href="/dashboard" className="btn btn-secondary btn-sm" style={{ cursor: 'pointer' }}>
               Dashboard
             </Link>
           ) : (
-            <Link href="/api/auth/openrouter/login" className="btn btn-primary btn-sm">
+            <a
+              href="/api/auth/openrouter/login"
+              className="btn btn-primary btn-sm"
+              style={{ cursor: 'pointer', textDecoration: 'none' }}
+            >
               Connect OpenRouter (BYOK)
-            </Link>
+            </a>
           )}
         </div>
       </header>
@@ -830,6 +845,17 @@ export default function ScanPage() {
           )}
         </div>
       )}
+
+      {/* Footer Navigation */}
+      <footer style={{ marginTop: 64, paddingTop: 24, borderTop: '1px solid var(--border)', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 24, flexWrap: 'wrap', marginBottom: 12 }}>
+          <Link href="/" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Home</Link>
+          <Link href="/comparison" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Comparison</Link>
+          <Link href="/privacy" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Privacy Policy</Link>
+          <Link href="/terms" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Terms of Service</Link>
+        </div>
+        <p style={{ margin: 0 }}>© 2026 AI Scan &middot; 100% In-Memory Evaluation</p>
+      </footer>
     </div>
   )
 }

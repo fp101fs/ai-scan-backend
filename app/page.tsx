@@ -1673,6 +1673,12 @@ export default function Home() {
           <Link href="/settings" style={{ color: '#9ca3af', textDecoration: 'none' }}>
             Settings
           </Link>
+          <Link href="/privacy" style={{ color: '#9ca3af', textDecoration: 'none' }}>
+            Privacy Policy
+          </Link>
+          <Link href="/terms" style={{ color: '#9ca3af', textDecoration: 'none' }}>
+            Terms of Service
+          </Link>
           <a href="/llms.txt" target="_blank" style={{ color: '#9ca3af', textDecoration: 'none' }}>
             llms.txt
           </a>
