@@ -246,7 +246,7 @@ export default function ScanPage() {
 
   const handleCopyReport = () => {
     if (!results) return
-    const report = `AI Scan Analysis Report (GPTZero + ZeroGPT Hybrid)\n=====================================\nOverall AI Probability : ${results.overallScore}%\nHuman Probability      : ${results.humanScore}%\nVerdict                : ${results.verdict}\nEngine Mode            : ${mode}\nAnalyzed Sentences     : ${results.allSentences.length}\nAnalyzed Paragraphs    : ${results.paragraphs.length}\nPerplexity Index       : ${results.avgPerplexity} / 100\nBurstiness Variance    : ${results.avgBurstiness} / 100\nVocabulary Diversity   : ${results.avgVocabulary}% TTR\n\nSentence Breakdown:\n` +
+    const report = `AIDetector.buzz Analysis Report (GPTZero + ZeroGPT Hybrid)\n=====================================\nOverall AI Probability : ${results.overallScore}%\nHuman Probability      : ${results.humanScore}%\nVerdict                : ${results.verdict}\nEngine Mode            : ${mode}\nAnalyzed Sentences     : ${results.allSentences.length}\nAnalyzed Paragraphs    : ${results.paragraphs.length}\nPerplexity Index       : ${results.avgPerplexity} / 100\nBurstiness Variance    : ${results.avgBurstiness} / 100\nVocabulary Diversity   : ${results.avgVocabulary}% TTR\n\nSentence Breakdown:\n` +
       results.allSentences.map((s) => `[${s.score >= 50 ? 'AI-LIKELY' : 'HUMAN'}] (${s.score}% AI): "${s.text}"`).join('\n')
 
     navigator.clipboard.writeText(report)
@@ -858,7 +858,7 @@ export default function ScanPage() {
           <Link href="/privacy" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Privacy Policy</Link>
           <Link href="/terms" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Terms of Service</Link>
         </div>
-        <p style={{ margin: 0 }}>© 2026 AI Scan &middot; 100% In-Memory Evaluation</p>
+        <p style={{ margin: 0 }}>© 2026 AIDetector.buzz &middot; 100% In-Memory Evaluation</p>
       </footer>
     </div>
   )

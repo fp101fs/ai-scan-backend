@@ -447,7 +447,7 @@ export default function Home() {
             alignItems: 'center',
           }}
         >
-          {/* Logo with Spiral Icon */}
+          {/* Logo with Bee Icon */}
           <Link
             href="/"
             style={{
@@ -455,32 +455,21 @@ export default function Home() {
               alignItems: 'center',
               gap: '10px',
               textDecoration: 'none',
-              color: '#111827',
+              color: '#18181b',
             }}
           >
-            <div
+            <img
+              src="/buzz.png"
+              alt="AIDetector.buzz"
               style={{
-                width: '26px',
-                height: '26px',
-                borderRadius: '50%',
-                border: '2.5px solid #111827',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative',
+                width: '32px',
+                height: '32px',
+                objectFit: 'contain',
+                borderRadius: '8px',
               }}
-            >
-              <div
-                style={{
-                  width: '10px',
-                  height: '10px',
-                  borderRadius: '50%',
-                  border: '2px solid #111827',
-                }}
-              />
-            </div>
-            <span style={{ fontSize: '21px', fontWeight: 700, letterSpacing: '-0.03em' }}>
-              AI Scan
+            />
+            <span style={{ fontSize: '21px', fontWeight: 800, letterSpacing: '-0.03em', color: '#18181b' }}>
+              AIDetector<span style={{ color: '#d97706' }}>.buzz</span>
             </span>
           </Link>
 
@@ -491,7 +480,7 @@ export default function Home() {
               style={{
                 fontSize: '14px',
                 fontWeight: 600,
-                color: '#4b5563',
+                color: '#52525b',
                 textDecoration: 'none',
               }}
             >
@@ -502,7 +491,7 @@ export default function Home() {
               style={{
                 fontSize: '14px',
                 fontWeight: 600,
-                color: '#4b5563',
+                color: '#52525b',
                 textDecoration: 'none',
               }}
             >
@@ -513,7 +502,7 @@ export default function Home() {
               style={{
                 fontSize: '14px',
                 fontWeight: 600,
-                color: '#4b5563',
+                color: '#52525b',
                 textDecoration: 'none',
               }}
             >
@@ -528,9 +517,10 @@ export default function Home() {
                   borderRadius: '9999px',
                   fontSize: '14px',
                   fontWeight: 600,
-                  color: '#111827',
+                  color: '#18181b',
                   backgroundColor: '#ffffff',
-                  border: '1px solid #d1d5db',
+                  border: '1px solid #fde68a',
+                  boxShadow: '0 2px 6px rgba(217, 119, 6, 0.08)',
                   textDecoration: 'none',
                 }}
               >
@@ -545,7 +535,8 @@ export default function Home() {
                   fontSize: '14px',
                   fontWeight: 600,
                   color: '#ffffff',
-                  backgroundColor: '#111827',
+                  background: 'linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #eab308 100%)',
+                  boxShadow: '0 3px 10px rgba(217, 119, 6, 0.25)',
                   textDecoration: 'none',
                 }}
               >
@@ -567,23 +558,23 @@ export default function Home() {
                 marginLeft: '4px',
               }}
             >
-              <span style={{ width: '20px', height: '2px', backgroundColor: '#111827', display: 'block' }} />
-              <span style={{ width: '20px', height: '2px', backgroundColor: '#111827', display: 'block' }} />
-              <span style={{ width: '20px', height: '2px', backgroundColor: '#111827', display: 'block' }} />
+              <span style={{ width: '20px', height: '2px', backgroundColor: '#18181b', display: 'block' }} />
+              <span style={{ width: '20px', height: '2px', backgroundColor: '#18181b', display: 'block' }} />
+              <span style={{ width: '20px', height: '2px', backgroundColor: '#18181b', display: 'block' }} />
             </button>
           </div>
         </div>
       </header>
 
-      {/* Blue Announcement Top Bar */}
+      {/* Honey Bee Announcement Top Bar */}
       <div
         style={{
-          backgroundColor: '#eff6ff',
-          borderBottom: '1px solid #dbeafe',
+          backgroundColor: '#fffbeb',
+          borderBottom: '1px solid #fef3c7',
           padding: '10px 16px',
           textAlign: 'center',
           fontSize: '14px',
-          color: '#1e40af',
+          color: '#92400e',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -595,36 +586,31 @@ export default function Home() {
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '20px',
-            height: '20px',
+            width: '22px',
+            height: '22px',
             borderRadius: '50%',
-            backgroundColor: '#2563eb',
-            color: 'white',
-            fontSize: '11px',
-            fontWeight: 'bold',
+            backgroundColor: '#fef3c7',
+            border: '1px solid #fde68a',
+            fontSize: '13px',
           }}
         >
-          🚀
+          🐝
         </span>
-        <span>+</span>
-        <span style={{ fontSize: '15px' }}>✨</span>
-        <span style={{ fontWeight: 500, color: '#1e3a8a' }}>
-          AI Scan is launching on Product Hunt! Support open AI detection.
+        <span style={{ fontWeight: 600, color: '#78350f' }}>
+          AIDetector.buzz is live! Ultra-fast stylometrics &amp; wholesale BYOK AI detection.
         </span>
         <a
-          href="https://www.producthunt.com"
-          target="_blank"
-          rel="noopener noreferrer"
+          href="/scan"
           style={{
-            color: '#1d4ed8',
-            fontWeight: 600,
+            color: '#b45309',
+            fontWeight: 700,
             textDecoration: 'underline',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '2px',
           }}
         >
-          Learn more &rarr;
+          Try it now &rarr;
         </a>
       </div>
 
@@ -653,8 +639,9 @@ export default function Home() {
               AI detector made to{' '}
               <span
                 style={{
-                  backgroundColor: '#dcfce7',
-                  color: '#065f46',
+                  backgroundColor: '#fef3c7',
+                  color: '#92400e',
+                  border: '1px solid #fde68a',
                   padding: '2px 10px',
                   borderRadius: '6px',
                   display: 'inline-block',
@@ -668,7 +655,7 @@ export default function Home() {
               style={{
                 fontSize: '1.125rem',
                 lineHeight: 1.6,
-                color: '#6b7280',
+                color: '#52525b',
                 marginBottom: '40px',
               }}
             >
@@ -685,36 +672,36 @@ export default function Home() {
                 gap: '32px',
                 marginBottom: '40px',
                 paddingBottom: '36px',
-                borderBottom: '1px solid #e5e7eb',
+                borderBottom: '1px solid #fde68a',
               }}
             >
               <div>
-                <div style={{ fontSize: '2rem', fontWeight: 700, color: '#111827', letterSpacing: '-0.02em' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 800, color: '#18181b', letterSpacing: '-0.02em' }}>
                   99%
                 </div>
-                <div style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '2px' }}>
+                <div style={{ fontSize: '0.875rem', color: '#71717a', marginTop: '2px' }}>
                   Accuracy
                 </div>
               </div>
 
-              <div style={{ width: '1px', height: '40px', backgroundColor: '#e5e7eb' }} />
+              <div style={{ width: '1px', height: '40px', backgroundColor: '#fde68a' }} />
 
               <div>
-                <div style={{ fontSize: '2rem', fontWeight: 700, color: '#111827', letterSpacing: '-0.02em' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 800, color: '#18181b', letterSpacing: '-0.02em' }}>
                   100%
                 </div>
-                <div style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '2px' }}>
+                <div style={{ fontSize: '0.875rem', color: '#71717a', marginTop: '2px' }}>
                   Zero Retention
                 </div>
               </div>
 
-              <div style={{ width: '1px', height: '40px', backgroundColor: '#e5e7eb' }} />
+              <div style={{ width: '1px', height: '40px', backgroundColor: '#fde68a' }} />
 
               <div>
-                <div style={{ fontSize: '2rem', fontWeight: 700, color: '#111827', letterSpacing: '-0.02em' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 800, color: '#d97706', letterSpacing: '-0.02em' }}>
                   ~$0.0001
                 </div>
-                <div style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '2px' }}>
+                <div style={{ fontSize: '0.875rem', color: '#71717a', marginTop: '2px' }}>
                   Wholesale / Scan
                 </div>
               </div>
@@ -728,13 +715,14 @@ export default function Home() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '16px',
-                  backgroundColor: '#f3f4f6',
+                  backgroundColor: '#fffdfa',
                   borderRadius: '16px',
                   padding: '16px 20px',
-                  border: '1px solid #e5e7eb',
+                  border: '1px solid #fde68a',
                   textDecoration: 'none',
                   color: 'inherit',
-                  transition: 'background-color 0.2s',
+                  boxShadow: '0 4px 12px rgba(217, 119, 6, 0.06)',
+                  transition: 'all 0.2s',
                 }}
               >
                 {/* Promo Icon */}
@@ -743,33 +731,35 @@ export default function Home() {
                     width: '44px',
                     height: '44px',
                     borderRadius: '12px',
-                    backgroundColor: '#3b82f6',
+                    background: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '22px',
+                    color: '#ffffff',
                     flexShrink: 0,
+                    boxShadow: '0 2px 8px rgba(217, 119, 6, 0.25)',
                   }}
                 >
-                  ⚡
+                  🐝
                 </div>
 
                 <div style={{ flexGrow: 1 }}>
-                  <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#2563eb', marginBottom: '2px' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#b45309', marginBottom: '2px' }}>
                     Open Live Interactive Web Scanner &rarr;
                   </div>
-                  <div style={{ fontSize: '0.8125rem', color: '#6b7280', lineHeight: 1.4 }}>
+                  <div style={{ fontSize: '0.8125rem', color: '#71717a', lineHeight: 1.4 }}>
                     Sentence-by-sentence highlights, B_sent burstiness, and wholesale OpenRouter BYOK.
                   </div>
                 </div>
 
-                <div style={{ color: '#9ca3af', fontSize: '18px' }}>&rsaquo;</div>
+                <div style={{ color: '#d97706', fontSize: '18px', fontWeight: 'bold' }}>&rsaquo;</div>
               </Link>
 
               {/* Dot Indicators */}
               <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginTop: '14px' }}>
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#111827' }} />
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#d1d5db' }} />
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#d97706' }} />
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#fde68a' }} />
               </div>
             </div>
           </div>
@@ -780,8 +770,8 @@ export default function Home() {
               style={{
                 backgroundColor: '#ffffff',
                 borderRadius: '20px',
-                border: '1px solid #e5e7eb',
-                boxShadow: '0 12px 36px rgba(0, 0, 0, 0.06)',
+                border: '1px solid #fde68a',
+                boxShadow: '0 12px 36px rgba(217, 119, 6, 0.08), 0 2px 8px rgba(0, 0, 0, 0.03)',
                 overflow: 'hidden',
               }}
             >
@@ -789,8 +779,8 @@ export default function Home() {
               <div
                 style={{
                   display: 'flex',
-                  borderBottom: '1px solid #f0f0ee',
-                  backgroundColor: '#f9fafb',
+                  borderBottom: '1px solid #fef3c7',
+                  backgroundColor: '#fffdfa',
                 }}
               >
                 <button
@@ -801,10 +791,10 @@ export default function Home() {
                     padding: '16px 20px',
                     border: 'none',
                     backgroundColor: activeTab === 'detector' ? '#ffffff' : 'transparent',
-                    borderBottom: activeTab === 'detector' ? '2px solid #111827' : '2px solid transparent',
-                    fontWeight: 600,
+                    borderBottom: activeTab === 'detector' ? '2.5px solid #d97706' : '2.5px solid transparent',
+                    fontWeight: 700,
                     fontSize: '0.9375rem',
-                    color: activeTab === 'detector' ? '#111827' : '#6b7280',
+                    color: activeTab === 'detector' ? '#d97706' : '#71717a',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -817,8 +807,8 @@ export default function Home() {
                       width: '14px',
                       height: '14px',
                       borderRadius: '50%',
-                      border: '2.5px solid #22c55e',
-                      borderTopColor: '#eab308',
+                      border: '2.5px solid #d97706',
+                      borderTopColor: '#fde047',
                       display: 'inline-block',
                     }}
                   />
@@ -833,10 +823,10 @@ export default function Home() {
                     padding: '16px 20px',
                     border: 'none',
                     backgroundColor: activeTab === 'stylometrics' ? '#ffffff' : 'transparent',
-                    borderBottom: activeTab === 'stylometrics' ? '2px solid #111827' : '2px solid transparent',
-                    fontWeight: 600,
+                    borderBottom: activeTab === 'stylometrics' ? '2.5px solid #d97706' : '2.5px solid transparent',
+                    fontWeight: 700,
                     fontSize: '0.9375rem',
-                    color: activeTab === 'stylometrics' ? '#111827' : '#6b7280',
+                    color: activeTab === 'stylometrics' ? '#d97706' : '#71717a',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -1349,17 +1339,17 @@ export default function Home() {
                     gap: '8px',
                     padding: '12px 28px',
                     borderRadius: '9999px',
-                    backgroundColor: isScanning ? '#9ca3af' : '#18181b',
+                    background: isScanning ? '#9ca3af' : 'linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #eab308 100%)',
                     color: '#ffffff',
                     border: 'none',
-                    fontWeight: 600,
+                    fontWeight: 700,
                     fontSize: '0.9375rem',
                     cursor: isScanning ? 'not-allowed' : 'pointer',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    boxShadow: '0 3px 12px rgba(217, 119, 6, 0.3)',
                   }}
                 >
-                  <span>{isScanning ? 'Scanning...' : 'Scan'}</span>
-                  <span>&rarr;</span>
+                  <span>{isScanning ? 'Scanning...' : 'Scan Now'}</span>
+                  <span>🐝</span>
                 </button>
               </div>
             </div>
@@ -1450,7 +1440,7 @@ export default function Home() {
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '40px' }}>
             <h2 style={{ fontSize: '2.25rem', fontWeight: 700, color: '#111827', marginBottom: '12px', letterSpacing: '-0.02em' }}>
-              Why AI Scan is Better Than the Parents
+              Why AIDetector.buzz is Better Than Legacy Detectors
             </h2>
             <p style={{ fontSize: '1.0625rem', color: '#6b7280' }}>
               A true hybrid uniting the strengths of both platforms while eliminating subscription traps.
@@ -1472,8 +1462,8 @@ export default function Home() {
                   <th style={{ padding: '14px 16px', color: '#111827' }}>Capability</th>
                   <th style={{ padding: '14px 16px', color: '#4b5563' }}>GPTZero</th>
                   <th style={{ padding: '14px 16px', color: '#4b5563' }}>ZeroGPT</th>
-                  <th style={{ padding: '14px 16px', color: '#065f46', fontWeight: 700 }}>
-                    AI Scan (Hybrid)
+                  <th style={{ padding: '14px 16px', color: '#b45309', fontWeight: 800 }}>
+                    AIDetector.buzz (Hybrid)
                   </th>
                 </tr>
               </thead>
@@ -1769,14 +1759,15 @@ export default function Home() {
       {/* Footer */}
       <footer
         style={{
-          backgroundColor: '#111827',
-          color: '#9ca3af',
+          backgroundColor: '#18181b',
+          color: '#a1a1aa',
           padding: '48px 28px',
           textAlign: 'center',
+          borderTop: '1px solid #fde68a',
         }}
       >
-        <p style={{ marginBottom: '16px', fontSize: '0.9375rem', color: '#d1d5db' }}>
-          © 2026 AI Scan. Built with OpenRouter OAuth &middot; All rights reserved.
+        <p style={{ marginBottom: '16px', fontSize: '0.9375rem', color: '#e4e4e7' }}>
+          © 2026 AIDetector.buzz. Built with OpenRouter OAuth &middot; All rights reserved.
         </p>
         <div
           style={{

@@ -2,8 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | AI Scan',
-  description: 'AI Scan privacy policy: Zero data retention, 100% in-memory processing, and transparent OpenRouter BYOK architecture.',
+  title: 'Privacy Policy | AIDetector.buzz',
+  description: 'AIDetector.buzz privacy policy: Zero data retention, 100% in-memory processing, and transparent OpenRouter BYOK architecture.',
 }
 
 export default function PrivacyPolicyPage() {
@@ -15,7 +15,7 @@ export default function PrivacyPolicyPage() {
           <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#111827', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: '13px' }}>
             AI
           </div>
-          <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', letterSpacing: '-0.02em' }}>AI Scan</span>
+          <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', letterSpacing: '-0.02em' }}>AIDetector.buzz</span>
         </Link>
 
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
@@ -51,7 +51,7 @@ export default function PrivacyPolicyPage() {
               1. Zero-Data Retention Architecture
             </h2>
             <p style={{ marginBottom: '12px' }}>
-              At AI Scan, our highest architectural priority is total data privacy. We operate on a strict <strong>Zero Data Retention</strong> policy:
+              At AIDetector.buzz, our highest architectural priority is total data privacy. We operate on a strict <strong>Zero Data Retention</strong> policy:
             </p>
             <ul style={{ paddingLeft: '24px', listStyleType: 'disc', marginBottom: '12px' }}>
               <li><strong>100% In-Memory Evaluation:</strong> Any text, essay, article, or document submitted for AI detection is analyzed entirely in volatile memory and immediately purged upon response delivery.</li>
@@ -65,7 +65,7 @@ export default function PrivacyPolicyPage() {
               2. OpenRouter OAuth &amp; Bring-Your-Own-Key (BYOK)
             </h2>
             <p style={{ marginBottom: '12px' }}>
-              AI Scan integrates directly with OpenRouter via secure Proof Key for Code Exchange (PKCE) OAuth:
+              AIDetector.buzz integrates directly with OpenRouter via secure Proof Key for Code Exchange (PKCE) OAuth:
             </p>
             <ul style={{ paddingLeft: '24px', listStyleType: 'disc', marginBottom: '12px' }}>
               <li>When you connect your OpenRouter account, your session token or API key is encrypted using AES-GCM and stored only for your authenticated session.</li>
@@ -93,7 +93,7 @@ export default function PrivacyPolicyPage() {
               4. Chrome Extension Privacy
             </h2>
             <p style={{ marginBottom: '12px' }}>
-              The AI Scan Chrome Extension operates strictly on user demand:
+              The AIDetector.buzz Chrome Extension operates strictly on user demand:
             </p>
             <ul style={{ paddingLeft: '24px', listStyleType: 'disc', marginBottom: '12px' }}>
               <li>The extension only reads text that you explicitly highlight or submit for scanning.</li>
@@ -107,7 +107,7 @@ export default function PrivacyPolicyPage() {
               5. Global Privacy Compliance (GDPR, CCPA/CPRA, FERPA)
             </h2>
             <p style={{ marginBottom: '12px' }}>
-              AI Scan complies with global data privacy frameworks:
+              AIDetector.buzz complies with global data privacy frameworks:
             </p>
             <ul style={{ paddingLeft: '24px', listStyleType: 'disc', marginBottom: '12px' }}>
               <li><strong>GDPR (EU/EEA):</strong> Right to access, rectify, and erase your account data immediately upon request.</li>
@@ -124,7 +124,7 @@ export default function PrivacyPolicyPage() {
               If you have any questions regarding this Privacy Policy or wish to submit a data erasure inquiry, please contact our Data Protection team at:
             </p>
             <div style={{ marginTop: '12px', padding: '16px 20px', borderRadius: '12px', backgroundColor: '#f9fafb', border: '1px solid #e5e7eb' }}>
-              <strong>AI Scan Data Protection Office</strong><br />
+              <strong>AIDetector.buzz Data Protection Office</strong><br />
               Email: <a href="mailto:privacy@kromio.ai" style={{ color: '#2563eb' }}>privacy@kromio.ai</a><br />
               Website: <a href="https://ai-scan-backend.vercel.app" style={{ color: '#2563eb' }}>ai-scan-backend.vercel.app</a>
             </div>
@@ -140,7 +140,7 @@ export default function PrivacyPolicyPage() {
           <Link href="/comparison" style={{ color: '#9ca3af', textDecoration: 'none' }}>Comparison</Link>
           <Link href="/terms" style={{ color: '#9ca3af', textDecoration: 'none' }}>Terms of Service</Link>
         </div>
-        <p style={{ margin: 0, color: '#6b7280' }}>© 2026 AI Scan. Zero Data Retention Architecture.</p>
+        <p style={{ margin: 0, color: '#6b7280' }}>© 2026 AIDetector.buzz. Zero Data Retention Architecture.</p>
       </footer>
     </div>
   )

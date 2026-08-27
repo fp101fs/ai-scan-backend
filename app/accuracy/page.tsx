@@ -2,34 +2,34 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: '1,000-Document Accuracy & Validation Benchmark | AI Scan',
-  description: 'Empirical 1,000-sample accuracy validation of AI Scan (GPTZero exact detection clone): 500 pre-2010 human writings and 500 AI-generated texts.',
+  title: '1,000-Document Accuracy & Validation Benchmark | AIDetector.buzz',
+  description: 'Empirical 1,000-sample accuracy validation of AIDetector.buzz: 500 pre-2010 human writings and 500 AI-generated texts.',
 }
 
 export default function AccuracyBenchmarkPage() {
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#fbfbfa', color: '#111827', fontFamily: 'var(--font-sans, system-ui, -apple-system, sans-serif)' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#faf8f3', color: '#18181b', fontFamily: 'var(--font-sans, system-ui, -apple-system, sans-serif)' }}>
       {/* Header Navigation */}
-      <nav style={{ maxWidth: '1100px', margin: '0 auto', padding: '24px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e5e7eb' }}>
-        <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#111827', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: '13px' }}>
-            AI
-          </div>
-          <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', letterSpacing: '-0.02em' }}>AI Scan</span>
+      <nav style={{ maxWidth: '1100px', margin: '0 auto', padding: '24px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #fde68a' }}>
+        <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <img src="/buzz.png" alt="AIDetector.buzz" style={{ width: '30px', height: '30px', borderRadius: '6px' }} />
+          <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#18181b', letterSpacing: '-0.02em' }}>
+            AIDetector<span style={{ color: '#d97706' }}>.buzz</span>
+          </span>
         </Link>
 
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <Link href="/" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#4b5563', textDecoration: 'none' }}>
+          <Link href="/" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#52525b', textDecoration: 'none' }}>
             Home
           </Link>
-          <Link href="/scan" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#4b5563', textDecoration: 'none' }}>
+          <Link href="/scan" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#52525b', textDecoration: 'none' }}>
             Scanner
           </Link>
-          <Link href="/comparison" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#4b5563', textDecoration: 'none' }}>
+          <Link href="/comparison" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#52525b', textDecoration: 'none' }}>
             Comparison
           </Link>
-          <Link href="/scan" style={{ padding: '8px 18px', borderRadius: '9999px', backgroundColor: '#111827', color: 'white', fontSize: '0.875rem', fontWeight: 600, textDecoration: 'none' }}>
-            Launch Detector
+          <Link href="/scan" style={{ padding: '8px 18px', borderRadius: '9999px', background: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)', color: 'white', fontSize: '0.875rem', fontWeight: 700, textDecoration: 'none', boxShadow: '0 2px 8px rgba(217, 119, 6, 0.25)' }}>
+            Launch Detector 🐝
           </Link>
         </div>
       </nav>
@@ -38,14 +38,14 @@ export default function AccuracyBenchmarkPage() {
       <main style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 20px 80px' }}>
         {/* Title Header */}
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 14px', borderRadius: '9999px', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', color: '#065f46', fontSize: '0.8125rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '14px' }}>
-            <span>✓</span> 1,000-Document Empirical Validation
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 14px', borderRadius: '9999px', backgroundColor: '#fef3c7', border: '1px solid #fde68a', color: '#92400e', fontSize: '0.8125rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '14px' }}>
+            <span>🐝</span> 1,000-Document Empirical Validation
           </div>
-          <h1 style={{ fontSize: '2.75rem', fontWeight: 800, color: '#111827', letterSpacing: '-0.03em', margin: '0 0 16px 0', lineHeight: 1.15 }}>
+          <h1 style={{ fontSize: '2.75rem', fontWeight: 800, color: '#18181b', letterSpacing: '-0.03em', margin: '0 0 16px 0', lineHeight: 1.15 }}>
             Empirical Accuracy &amp; Benchmark Report
           </h1>
-          <p style={{ fontSize: '1.125rem', color: '#4b5563', maxWidth: '720px', margin: '0 auto', lineHeight: 1.6 }}>
-            Rigorous evaluation of AI Scan&apos;s mathematical detection engine against a dataset of <strong>1,000 full documents</strong> (500 historical human writings created before 2010 and 500 multi-model AI texts).
+          <p style={{ fontSize: '1.125rem', color: '#52525b', maxWidth: '720px', margin: '0 auto', lineHeight: 1.6 }}>
+            Rigorous evaluation of AIDetector.buzz&apos;s mathematical detection engine against a dataset of <strong>1,000 full documents</strong> (500 historical human writings created before 2010 and 500 multi-model AI texts).
           </p>
         </div>
 
@@ -252,7 +252,7 @@ export default function AccuracyBenchmarkPage() {
           <Link href="/privacy" style={{ color: '#9ca3af', textDecoration: 'none' }}>Privacy Policy</Link>
           <Link href="/terms" style={{ color: '#9ca3af', textDecoration: 'none' }}>Terms of Service</Link>
         </div>
-        <p style={{ margin: 0, color: '#6b7280' }}>© 2026 AI Scan. 1,000-Document Empirical Validation Benchmark.</p>
+        <p style={{ margin: 0, color: '#6b7280' }}>© 2026 AIDetector.buzz. 1,000-Document Empirical Validation Benchmark.</p>
       </footer>
     </div>
   )

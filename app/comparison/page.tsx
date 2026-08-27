@@ -3,9 +3,9 @@ import type { Metadata } from 'next'
 import ThemeToggle from '@/components/ThemeToggle'
 
 export const metadata: Metadata = {
-  title: 'AI Scan vs GPTZero vs ZeroGPT — Technical Comparison & Architecture',
+  title: 'AIDetector.buzz vs GPTZero vs ZeroGPT — Technical Comparison & Architecture',
   description:
-    'A deep technical breakdown comparing how GPTZero, ZeroGPT, and AI Scan detect AI-generated text, their underlying algorithms, and architectural differences.',
+    'A deep technical breakdown comparing how GPTZero, ZeroGPT, and AIDetector.buzz detect AI-generated text, their underlying algorithms, and architectural differences.',
 }
 
 export default function ComparisonPage() {
@@ -17,11 +17,14 @@ export default function ComparisonPage() {
           <Link href="/" className="text-link" style={{ fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
             &larr; Back to Home
           </Link>
-          <h1 className="text-gradient" style={{ fontSize: 34, marginTop: 12, marginBottom: 8 }}>
-            AI Scan vs GPTZero vs ZeroGPT
-          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12, marginBottom: 8 }}>
+            <img src="/buzz.png" alt="AIDetector.buzz" style={{ width: 32, height: 32, borderRadius: 6 }} />
+            <h1 className="text-gradient" style={{ fontSize: 32, margin: 0 }}>
+              AIDetector.buzz vs GPTZero vs ZeroGPT
+            </h1>
+          </div>
           <p className="text-secondary" style={{ fontSize: 16, maxWidth: 760 }}>
-            How commercial AI detectors actually work under the hood, whether they use LLMs, and how AI Scan fuses both methodologies into an open, transparent platform.
+            How commercial AI detectors actually work under the hood, whether they use LLMs, and how AIDetector.buzz fuses both methodologies into an open, transparent platform.
           </p>
         </div>
 
@@ -45,7 +48,7 @@ export default function ComparisonPage() {
                 <th>Feature / Metric</th>
                 <th>GPTZero</th>
                 <th>ZeroGPT</th>
-                <th style={{ color: 'var(--accent-light)' }}>AI Scan (Hybrid Fusion)</th>
+                <th style={{ color: 'var(--accent-light)' }}>AIDetector.buzz (Hybrid Fusion)</th>
               </tr>
             </thead>
             <tbody>
@@ -169,14 +172,14 @@ export default function ComparisonPage() {
         </div>
       </section>
 
-      {/* Deep Dive Section 3: AI Scan Hybrid Fusion */}
+      {/* Deep Dive Section 3: AIDetector.buzz Hybrid Fusion */}
       <section className="glass-card" style={{ marginBottom: 48, padding: '32px', borderColor: 'var(--accent)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-          <span style={{ fontSize: 28 }}>🚀</span>
-          <h2 className="text-gradient" style={{ fontSize: 24, margin: 0 }}>3. How AI Scan Combines the Best of Both</h2>
+          <span style={{ fontSize: 28 }}>🐝</span>
+          <h2 className="text-gradient" style={{ fontSize: 24, margin: 0 }}>3. How AIDetector.buzz Combines the Best of Both</h2>
         </div>
         <p className="text-secondary" style={{ fontSize: 15, lineHeight: 1.7, marginBottom: 16 }}>
-          <strong>AI Scan gives you the best of both worlds:</strong> ZeroGPT&apos;s instant, zero-cost mathematical heuristics combined with GPTZero&apos;s multi-model perplexity, interactive sentence highlights, and trained meta-classifier.
+          <strong>AIDetector.buzz gives you the best of both worlds:</strong> ZeroGPT&apos;s instant, zero-cost mathematical heuristics combined with GPTZero&apos;s multi-model perplexity, interactive sentence highlights, and trained meta-classifier.
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 20 }}>

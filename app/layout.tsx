@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { Inter } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/react'
 import Providers from './providers'
 import './globals.css'
 
@@ -9,18 +10,19 @@ const inter = Inter({
   display: 'swap',
 })
 
-const baseUrl = process.env.NEXTAUTH_URL || 'https://ai-scan-backend.vercel.app'
+const baseUrl = process.env.NEXTAUTH_URL || 'https://aidetector.buzz'
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: 'AI Scan — Open AI Content Detector & Stylometrics (OpenRouter BYOK)',
-    template: '%s | AI Scan',
+    default: 'AIDetector.buzz — Open AI Content Detector & Stylometrics',
+    template: '%s | AIDetector.buzz',
   },
   description:
     'Detect AI-generated text in real time with OpenRouter OAuth (BYOK) and statistical stylometric analysis (Perplexity, Burstiness, and Lexical Diversity).',
   keywords: [
     'AI Detector',
+    'AIDetector.buzz',
     'OpenRouter OAuth',
     'GPTZero Alternative',
     'AI Content Detection',
@@ -34,9 +36,14 @@ export const metadata: Metadata = {
     'Chrome Extension AI Detector',
     'BYOK AI Scanner',
   ],
-  authors: [{ name: 'AI Scan Team' }],
-  creator: 'AI Scan',
-  publisher: 'AI Scan',
+  authors: [{ name: 'AIDetector.buzz Team' }],
+  creator: 'AIDetector.buzz',
+  publisher: 'AIDetector.buzz',
+  icons: {
+    icon: '/buzz.png',
+    shortcut: '/buzz.png',
+    apple: '/buzz.png',
+  },
   alternates: {
     canonical: '/',
   },
@@ -44,17 +51,26 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: baseUrl,
-    siteName: 'AI Scan',
-    title: 'AI Scan — Open AI Content Detector with OpenRouter OAuth',
+    siteName: 'AIDetector.buzz',
+    title: 'AIDetector.buzz — Open AI Content Detector with OpenRouter OAuth',
     description:
       'Detect AI-generated text with mathematical precision. 1-click OpenRouter OAuth PKCE, offline heuristics, and multi-model verification.',
+    images: [
+      {
+        url: '/buzz.png',
+        width: 512,
+        height: 512,
+        alt: 'AIDetector.buzz Logo',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AI Scan — Open AI Content Detector (OpenRouter BYOK)',
+    title: 'AIDetector.buzz — Open AI Content Detector (OpenRouter BYOK)',
     description:
       'Detect AI-generated text with OpenRouter OAuth PKCE, burstiness variance, and perplexity analysis.',
-    creator: '@ai_scan',
+    images: ['/buzz.png'],
+    creator: '@aidetector_buzz',
   },
   robots: {
     index: true,
@@ -75,7 +91,7 @@ const jsonLd = {
     {
       '@type': 'WebApplication',
       '@id': `${baseUrl}/#webapp`,
-      name: 'AI Scan',
+      name: 'AIDetector.buzz',
       url: baseUrl,
       description:
         'Open-source AI content detection platform and Chrome Extension powered by OpenRouter OAuth and statistical stylometrics.',
@@ -108,10 +124,10 @@ const jsonLd = {
         },
         {
           '@type': 'Question',
-          name: 'Can I use AI Scan for free without an OpenRouter account?',
+          name: 'Can I use AIDetector.buzz for free without an OpenRouter account?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes, AI Scan contains a built-in Offline Heuristic engine that evaluates sentence length variance (burstiness) and vocabulary entropy locally without API keys or cost.',
+            text: 'Yes, AIDetector.buzz contains a built-in Offline Heuristic engine that evaluates sentence length variance (burstiness) and vocabulary entropy locally without API keys or cost.',
           },
         },
         {
@@ -119,7 +135,7 @@ const jsonLd = {
           name: 'Is my scanned text private?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes. AI Scan processes text in memory on-demand and does not store, index, or train on your submitted documents.',
+            text: 'Yes. AIDetector.buzz processes text in memory on-demand and does not store, index, or train on your submitted documents.',
           },
         },
       ],
@@ -129,8 +145,9 @@ const jsonLd = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-theme="light" suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/buzz.png" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -139,12 +156,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   var stored = localStorage.getItem('theme');
                   if (stored === 'light' || stored === 'dark') {
                     document.documentElement.setAttribute('data-theme', stored);
-                  } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
-                    document.documentElement.setAttribute('data-theme', 'light');
                   } else {
-                    document.documentElement.setAttribute('data-theme', 'dark');
+                    document.documentElement.setAttribute('data-theme', 'light');
                   }
-                } catch (e) {}
+                } catch (e) {
+                  document.documentElement.setAttribute('data-theme', 'light');
+                }
               })();
             `,
           }}
@@ -156,6 +173,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className={inter.className} style={{ minHeight: '100vh' }}>
         <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   )

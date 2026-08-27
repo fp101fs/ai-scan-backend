@@ -153,8 +153,8 @@ async function callOpenRouter(
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
-      "HTTP-Referer": process.env.NEXTAUTH_URL || "https://ai-scan-backend.vercel.app",
-      "X-Title": "AI Scan (ProductHunt)",
+      "HTTP-Referer": process.env.NEXTAUTH_URL || "https://aidetector.buzz",
+      "X-Title": "AIDetector.buzz",
     },
     body: JSON.stringify({
       model: modelName,
