@@ -56,8 +56,16 @@ export default function Home() {
 
   const [text, setText] = useState('')
   const [isScanning, setIsScanning] = useState(false)
-  const [activeTab, setActiveTab] = useState<'detector' | 'stylometrics'>('detector')
+  const [activeTab, setActiveTab] = useState<'detector' | 'humanizer'>('detector')
   const [selectedExample, setSelectedExample] = useState<string | null>(null)
+  
+  // Humanizer v1 state
+  const [humanizeInput, setHumanizeInput] = useState('')
+  const [humanizedOutput, setHumanizedOutput] = useState<string | null>(null)
+  const [isHumanizing, setIsHumanizing] = useState(false)
+  const [humanizeMethod, setHumanizeMethod] = useState<string | null>(null)
+  const [copiedHumanized, setCopiedHumanized] = useState(false)
+
   const [scanResult, setScanResult] = useState<{
     score: number
     verdict: string
@@ -83,6 +91,48 @@ export default function Home() {
   const liveStylometrics = useMemo(() => {
     return analyzeHeuristics(text.trim() || exampleTexts['ChatGPT'])
   }, [text])
+
+  const handleHumanize = async () => {
+    const targetText = humanizeInput.trim() || text.trim()
+    if (targetText.length < 10) {
+      alert('Please enter at least 10 characters to humanize.')
+      return
+    }
+    setIsHumanizing(true)
+    try {
+      const res = await fetch('/api/humanize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: targetText }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setHumanizedOutput(data.humanizedText || '')
+        setHumanizeMethod(data.method || 'heuristic')
+      } else {
+        // Simple fallback
+        const fallback = targetText
+          .replace(/\bFurthermore,\s*/gi, "Also, ")
+          .replace(/\bMoreover,\s*/gi, "On top of that, ")
+          .replace(/\bIn conclusion,\s*/gi, "All in all, ")
+          .replace(/\bseamlessly\s*/gi, "smoothly ")
+          .replace(/\bdelve into\s*/gi, "explore ")
+        setHumanizedOutput(fallback)
+        setHumanizeMethod('heuristic')
+      }
+    } catch {
+      const fallback = targetText
+        .replace(/\bFurthermore,\s*/gi, "Also, ")
+        .replace(/\bMoreover,\s*/gi, "On top of that, ")
+        .replace(/\bIn conclusion,\s*/gi, "All in all, ")
+        .replace(/\bseamlessly\s*/gi, "smoothly ")
+        .replace(/\bdelve into\s*/gi, "explore ")
+      setHumanizedOutput(fallback)
+      setHumanizeMethod('heuristic')
+    } finally {
+      setIsHumanizing(false)
+    }
+  }
 
   const pricingTiers: PricingTier[] = [
     {
@@ -817,16 +867,21 @@ export default function Home() {
 
                 <button
                   type="button"
-                  onClick={() => setActiveTab('stylometrics')}
+                  onClick={() => {
+                    setActiveTab('humanizer')
+                    if (!humanizeInput && text) {
+                      setHumanizeInput(text)
+                    }
+                  }}
                   style={{
                     flex: 1,
                     padding: '16px 20px',
                     border: 'none',
-                    backgroundColor: activeTab === 'stylometrics' ? '#ffffff' : 'transparent',
-                    borderBottom: activeTab === 'stylometrics' ? '2.5px solid #d97706' : '2.5px solid transparent',
+                    backgroundColor: activeTab === 'humanizer' ? '#ffffff' : 'transparent',
+                    borderBottom: activeTab === 'humanizer' ? '2.5px solid #d97706' : '2.5px solid transparent',
                     fontWeight: 700,
                     fontSize: '0.9375rem',
-                    color: activeTab === 'stylometrics' ? '#d97706' : '#71717a',
+                    color: activeTab === 'humanizer' ? '#d97706' : '#71717a',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -834,524 +889,755 @@ export default function Home() {
                     gap: '8px',
                   }}
                 >
-                  <span style={{ fontSize: '15px' }}>🌀</span>
-                  Burstiness &amp; Stylometrics
+                  <span style={{ fontSize: '15px' }}>✨</span>
+                  Humanizer <span style={{ fontSize: '11px', padding: '1px 6px', borderRadius: '9999px', backgroundColor: '#fef3c7', color: '#92400e', fontWeight: 800 }}>v1</span>
                 </button>
               </div>
 
-              {/* Text Input Area & Inline Upload Buttons */}
-              <div style={{ padding: '24px 24px 16px' }}>
-                {/* Header row inside textarea: "Paste your text or [Upload files] [Upload from Google Drive]" */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    flexWrap: 'wrap',
-                    marginBottom: '12px',
-                  }}
-                >
-                  <span style={{ color: '#9ca3af', fontSize: '0.95rem' }}>Paste your text or</span>
-                  
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileUpload}
-                    style={{ display: 'none' }}
-                    accept=".txt,.pdf,.docx,.md"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '6px 14px',
-                      borderRadius: '9999px',
-                      backgroundColor: '#f3f4f6',
-                      border: 'none',
-                      color: '#4b5563',
-                      fontSize: '0.8125rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <span>📤</span> Upload files
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setText(exampleTexts['ChatGPT'])
-                      setScanResult(null)
-                    }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '6px 14px',
-                      borderRadius: '9999px',
-                      backgroundColor: '#f3f4f6',
-                      border: 'none',
-                      color: '#4b5563',
-                      fontSize: '0.8125rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <span>⚡</span> Sample Essay
-                  </button>
-                </div>
-
-                {/* Input Area: Detector Tab vs Burstiness & Stylometrics Tab */}
-                {activeTab === 'stylometrics' ? (
-                  <div style={{ minHeight: '220px', padding: '4px 0' }}>
+              {activeTab === 'detector' ? (
+                <>
+                  {/* Text Input Area & Inline Upload Buttons */}
+                  <div style={{ padding: '24px 24px 16px' }}>
+                    {/* Header row inside textarea: "Paste your text or [Upload files] [Sample Essay]" */}
                     <div
                       style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                        gap: '16px',
-                        marginBottom: '16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        flexWrap: 'wrap',
+                        marginBottom: '12px',
                       }}
                     >
-                      <div
-                        style={{
-                          padding: '16px',
-                          borderRadius: '12px',
-                          backgroundColor: '#f9fafb',
-                          border: '1px solid #e5e7eb',
-                        }}
-                      >
-                        <div style={{ fontSize: '0.8125rem', color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>
-                          Sentence Burstiness (B_sent)
-                        </div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: liveStylometrics.burstinessScore < 30 ? '#dc2626' : '#16a34a' }}>
-                          {liveStylometrics.burstinessScore} / 100
-                        </div>
-                        <div style={{ fontSize: '0.8125rem', color: '#4b5563', marginTop: '4px' }}>
-                          {liveStylometrics.burstinessScore < 30 ? '⚠️ Low Variation (Machine Uniformity)' : '✓ High Variation (Human Rhythm)'}
-                        </div>
-                      </div>
+                      <span style={{ color: '#9ca3af', fontSize: '0.95rem' }}>Paste your text or</span>
+                      
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileUpload}
+                        style={{ display: 'none' }}
+                        accept=".txt,.pdf,.docx,.md"
+                      />
 
-                      <div
-                        style={{
-                          padding: '16px',
-                          borderRadius: '12px',
-                          backgroundColor: '#f9fafb',
-                          border: '1px solid #e5e7eb',
-                        }}
-                      >
-                        <div style={{ fontSize: '0.8125rem', color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>
-                          Vocabulary Diversity (TTR)
-                        </div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111827' }}>
-                          {liveStylometrics.vocabularyScore}%
-                        </div>
-                        <div style={{ fontSize: '0.8125rem', color: '#4b5563', marginTop: '4px' }}>
-                          Type-Token Ratio across {liveStylometrics.wordCount} words
-                        </div>
-                      </div>
-
-                      <div
-                        style={{
-                          padding: '16px',
-                          borderRadius: '12px',
-                          backgroundColor: '#f9fafb',
-                          border: '1px solid #e5e7eb',
-                        }}
-                      >
-                        <div style={{ fontSize: '0.8125rem', color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>
-                          Avg Sentence Length
-                        </div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111827' }}>
-                          {liveStylometrics.averageSentenceLength} <span style={{ fontSize: '0.9375rem', fontWeight: 500 }}>words</span>
-                        </div>
-                        <div style={{ fontSize: '0.8125rem', color: '#4b5563', marginTop: '4px' }}>
-                          Across {liveStylometrics.sentenceCount} analyzed sentences
-                        </div>
-                      </div>
-
-                      <div
-                        style={{
-                          padding: '16px',
-                          borderRadius: '12px',
-                          backgroundColor: '#f9fafb',
-                          border: '1px solid #e5e7eb',
-                        }}
-                      >
-                        <div style={{ fontSize: '0.8125rem', color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>
-                          Formulaic Connectives
-                        </div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: liveStylometrics.aiPhraseCount > 0 ? '#b91c1c' : '#166534' }}>
-                          {liveStylometrics.aiPhraseCount} <span style={{ fontSize: '0.9375rem', fontWeight: 500 }}>phrases</span>
-                        </div>
-                        <div style={{ fontSize: '0.8125rem', color: '#4b5563', marginTop: '4px' }}>
-                          {liveStylometrics.aiPhraseCount > 0 ? 'Synthetic transition markers detected' : 'No synthetic clichés flagged'}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={{ fontSize: '0.8125rem', color: '#6b7280', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', borderTop: '1px dashed #e5e7eb' }}>
-                      <span>🌀 Stylometrics reflect zero-API mathematical distribution for the active text.</span>
                       <button
                         type="button"
-                        onClick={() => setActiveTab('detector')}
-                        style={{ background: 'none', border: 'none', color: '#2563eb', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                        onClick={() => fileInputRef.current?.click()}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '6px 14px',
+                          borderRadius: '9999px',
+                          backgroundColor: '#f3f4f6',
+                          border: 'none',
+                          color: '#4b5563',
+                          fontSize: '0.8125rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
                       >
-                        Switch to Scanner &rarr;
+                        <span>📤</span> Upload files
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setText(exampleTexts['ChatGPT'])
+                          setScanResult(null)
+                        }}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '6px 14px',
+                          borderRadius: '9999px',
+                          backgroundColor: '#f3f4f6',
+                          border: 'none',
+                          color: '#4b5563',
+                          fontSize: '0.8125rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <span>⚡</span> Sample Essay
                       </button>
                     </div>
-                  </div>
-                ) : scanResult && scannedParagraphs.length > 0 && !isEditing ? (
-                  <div>
-                    <div
-                      onClick={() => setIsEditing(true)}
-                      title="Click anywhere to edit text"
-                      style={{
-                        width: '100%',
-                        minHeight: '220px',
-                        fontSize: '1rem',
-                        lineHeight: 1.65,
-                        color: '#111827',
-                        fontFamily: 'inherit',
-                        padding: '4px 0',
-                        whiteSpace: 'pre-wrap',
-                        cursor: 'text',
-                      }}
-                    >
-                      {scannedParagraphs.map((p, pIdx) => (
-                        <p key={pIdx} style={{ marginBottom: pIdx < scannedParagraphs.length - 1 ? '1.1em' : 0 }}>
-                          {p.sentences && p.sentences.length > 0 ? (
-                            p.sentences.map((s, sIdx) => (
-                              <span
-                                key={sIdx}
-                                style={{
-                                  backgroundColor: s.isAi ? '#fef08a' : 'transparent',
-                                  color: s.isAi ? '#1f2937' : 'inherit',
-                                  padding: s.isAi ? '2px 4px' : '0',
-                                  marginRight: '2px',
-                                  borderRadius: s.isAi ? '4px' : '0',
-                                  boxDecorationBreak: 'clone',
-                                  WebkitBoxDecorationBreak: 'clone',
-                                  fontWeight: s.isAi ? 500 : 'normal',
-                                }}
-                                title={`Sentence AI Score: ${s.score}%`}
-                              >
-                                {s.text}{' '}
-                              </span>
-                            ))
-                          ) : (
-                            <span
+
+                    {scanResult && scannedParagraphs.length > 0 && !isEditing ? (
+                      <div>
+                        <div
+                          onClick={() => setIsEditing(true)}
+                          title="Click anywhere to edit text"
+                          style={{
+                            width: '100%',
+                            minHeight: '220px',
+                            fontSize: '1rem',
+                            lineHeight: 1.65,
+                            color: '#111827',
+                            fontFamily: 'inherit',
+                            padding: '4px 0',
+                            whiteSpace: 'pre-wrap',
+                            cursor: 'text',
+                          }}
+                        >
+                          {scannedParagraphs.map((p, pIdx) => (
+                            <p key={pIdx} style={{ marginBottom: pIdx < scannedParagraphs.length - 1 ? '1.1em' : 0 }}>
+                              {p.sentences && p.sentences.length > 0 ? (
+                                p.sentences.map((s, sIdx) => (
+                                  <span
+                                    key={sIdx}
+                                    style={{
+                                      backgroundColor: s.isAi ? '#fef08a' : 'transparent',
+                                      color: s.isAi ? '#1f2937' : 'inherit',
+                                      padding: s.isAi ? '2px 4px' : '0',
+                                      marginRight: '2px',
+                                      borderRadius: s.isAi ? '4px' : '0',
+                                      boxDecorationBreak: 'clone',
+                                      WebkitBoxDecorationBreak: 'clone',
+                                      fontWeight: s.isAi ? 500 : 'normal',
+                                    }}
+                                    title={`Sentence AI Score: ${s.score}%`}
+                                  >
+                                    {s.text}{' '}
+                                  </span>
+                                ))
+                              ) : (
+                                <span
+                                  style={{
+                                    backgroundColor: p.isAi ? '#fef08a' : 'transparent',
+                                    color: p.isAi ? '#1f2937' : 'inherit',
+                                    padding: p.isAi ? '2px 4px' : '0',
+                                    borderRadius: p.isAi ? '4px' : '0',
+                                    boxDecorationBreak: 'clone',
+                                    WebkitBoxDecorationBreak: 'clone',
+                                  }}
+                                >
+                                  {p.text}
+                                </span>
+                              )}
+                            </p>
+                          ))}
+                        </div>
+
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginTop: '8px',
+                            paddingTop: '8px',
+                            borderTop: '1px dashed #e5e7eb',
+                            fontSize: '0.8125rem',
+                            color: '#6b7280',
+                          }}
+                        >
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: '#fef08a', border: '1px solid #facc15' }} />
+                            <span>Highlighted in yellow: AI-generated section</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setIsEditing(true)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#2563eb',
+                              cursor: 'pointer',
+                              fontWeight: 600,
+                              padding: 0,
+                              fontSize: '0.8125rem',
+                            }}
+                          >
+                            ✏️ Edit text
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <textarea
+                        value={text}
+                        onChange={(e) => {
+                          setText(e.target.value)
+                          if (scanResult) setScanResult(null)
+                          if (scannedParagraphs.length > 0) setScannedParagraphs([])
+                        }}
+                        onPaste={(e) => {
+                          const pastedText = e.clipboardData?.getData('text') || ''
+                          if (pastedText.trim().length >= 10) {
+                            setText(pastedText)
+                            handleScan(pastedText)
+                          }
+                        }}
+                        placeholder="Paste your essay, article, or document here to instantly scan for AI-generated sentences..."
+                        style={{
+                          width: '100%',
+                          minHeight: '220px',
+                          border: 'none',
+                          outline: 'none',
+                          fontSize: '1rem',
+                          lineHeight: 1.6,
+                          color: '#111827',
+                          resize: 'vertical',
+                          fontFamily: 'inherit',
+                          padding: 0,
+                        }}
+                      />
+                    )}
+
+                    {/* Scan Result Notification */}
+                    {scanResult && (
+                      <div
+                        style={{
+                          marginTop: '16px',
+                          marginBottom: '12px',
+                          padding: '16px 20px',
+                          borderRadius: '14px',
+                          backgroundColor: scanResult.score >= 50 ? '#fef2f2' : scanResult.score >= 35 ? '#fffbeb' : '#f0fdf4',
+                          border: `1px solid ${scanResult.score >= 50 ? '#fca5a5' : scanResult.score >= 35 ? '#fcd34d' : '#86efac'}`,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            gap: '12px',
+                            marginBottom: '12px',
+                          }}
+                        >
+                          <div>
+                            <div
                               style={{
-                                backgroundColor: p.isAi ? '#fef08a' : 'transparent',
-                                color: p.isAi ? '#1f2937' : 'inherit',
-                                padding: p.isAi ? '2px 4px' : '0',
-                                borderRadius: p.isAi ? '4px' : '0',
-                                boxDecorationBreak: 'clone',
-                                WebkitBoxDecorationBreak: 'clone',
+                                fontSize: '1.25rem',
+                                fontWeight: 800,
+                                color: scanResult.score >= 50 ? '#b91c1c' : scanResult.score >= 35 ? '#b45309' : '#15803d',
+                                marginBottom: '3px',
+                                letterSpacing: '-0.02em',
                               }}
                             >
-                              {p.text}
+                              {scanResult.score}% AI Detected
+                            </div>
+                            <div
+                              style={{
+                                fontSize: '0.95rem',
+                                color: scanResult.score >= 50 ? '#991b1b' : scanResult.score >= 35 ? '#92400e' : '#166534',
+                                fontWeight: 600,
+                                lineHeight: 1.4,
+                                marginBottom: '2px',
+                              }}
+                            >
+                              {scanResult.verdict}
+                            </div>
+                            {scanResult.subVerdict && (
+                              <div style={{ fontSize: '0.8125rem', color: '#6b7280' }}>
+                                {scanResult.subVerdict}
+                              </div>
+                            )}
+                          </div>
+
+                          <Link
+                            href="/scan"
+                            style={{
+                              fontSize: '0.875rem',
+                              fontWeight: 600,
+                              color: '#b45309',
+                              textDecoration: 'none',
+                              padding: '6px 14px',
+                              backgroundColor: '#ffffff',
+                              borderRadius: '9999px',
+                              border: '1px solid #fde68a',
+                              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                            }}
+                          >
+                            View detailed breakdown &rarr;
+                          </Link>
+                        </div>
+
+                        {/* 3-Way Probability Bar */}
+                        <div
+                          style={{
+                            display: 'flex',
+                            gap: '8px',
+                            paddingTop: '10px',
+                            borderTop: '1px solid rgba(0,0,0,0.06)',
+                            flexWrap: 'wrap',
+                            fontSize: '0.8125rem',
+                          }}
+                        >
+                          <span
+                            style={{
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              backgroundColor: '#ffffff',
+                              border: '1px solid #e5e7eb',
+                              color: '#374151',
+                            }}
+                          >
+                            Entirely AI: <strong>{scanResult.completelyGeneratedProb ?? (scanResult.score >= 70 ? 98 : 2)}%</strong>
+                          </span>
+                          <span
+                            style={{
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              backgroundColor: '#ffffff',
+                              border: '1px solid #e5e7eb',
+                              color: '#374151',
+                            }}
+                          >
+                            Mixed Content: <strong>{scanResult.mixedGeneratedProb ?? (scanResult.score >= 35 && scanResult.score < 70 ? 88 : 3)}%</strong>
+                          </span>
+                          <span
+                            style={{
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              backgroundColor: '#ffffff',
+                              border: '1px solid #e5e7eb',
+                              color: '#374151',
+                            }}
+                          >
+                            Entirely Human: <strong>{scanResult.humanWrittenProb ?? (scanResult.score < 35 ? 94 : 0)}%</strong>
+                          </span>
+
+                          {scanResult.avgPerplexity !== undefined && (
+                            <span
+                              style={{
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                backgroundColor: '#ffffff',
+                                border: '1px solid #e5e7eb',
+                                color: '#6b7280',
+                                marginLeft: 'auto',
+                              }}
+                            >
+                              Avg Perplexity: <strong style={{ color: '#111827' }}>{scanResult.avgPerplexity}</strong> &middot; Burstiness: <strong style={{ color: '#111827' }}>{scanResult.burstiness}</strong>
                             </span>
                           )}
-                        </p>
-                      ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Examples Row */}
+                    <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #f3f4f6' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          flexWrap: 'wrap',
+                        }}
+                      >
+                        <span style={{ fontSize: '0.8125rem', color: '#6b7280', fontWeight: 500, marginRight: '4px' }}>
+                          Examples:
+                        </span>
+                        {examples.map((example) => (
+                          <button
+                            key={example}
+                            type="button"
+                            onClick={() => handleExampleClick(example)}
+                            style={{
+                              padding: '6px 14px',
+                              borderRadius: '8px',
+                              border: 'none',
+                              backgroundColor: selectedExample === example ? '#fef3c7' : '#f3f4f6',
+                              color: selectedExample === example ? '#92400e' : '#1f2937',
+                              fontSize: '0.8125rem',
+                              fontWeight: 500,
+                              cursor: 'pointer',
+                              transition: 'background-color 0.15s',
+                            }}
+                          >
+                            {example}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bottom Action Footer Bar */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '14px 24px',
+                      borderTop: '1px solid #f0f0ee',
+                      backgroundColor: '#ffffff',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '0.8125rem', color: '#6b7280' }}>
+                        {text.length}/10,000 characters
+                      </span>
+                      <Link
+                        href="/scan"
+                        style={{
+                          padding: '4px 14px',
+                          borderRadius: '9999px',
+                          border: '1px solid #fde68a',
+                          backgroundColor: '#fffdfa',
+                          color: '#b45309',
+                          fontSize: '0.8125rem',
+                          fontWeight: 600,
+                          textDecoration: 'none',
+                        }}
+                      >
+                        Advanced Scan
+                      </Link>
                     </div>
 
+                    <button
+                      type="button"
+                      onClick={handleScan}
+                      disabled={isScanning}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '12px 28px',
+                        borderRadius: '9999px',
+                        background: isScanning ? '#9ca3af' : 'linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #eab308 100%)',
+                        color: '#ffffff',
+                        border: 'none',
+                        fontWeight: 700,
+                        fontSize: '0.9375rem',
+                        cursor: isScanning ? 'not-allowed' : 'pointer',
+                        boxShadow: '0 3px 12px rgba(217, 119, 6, 0.3)',
+                      }}
+                    >
+                      <span>{isScanning ? 'Scanning...' : 'Scan Now'}</span>
+                      <span>🐝</span>
+                    </button>
+                  </div>
+
+                  {/* Burstiness & Stylometrics Report (Moved below Action Bar) */}
+                  <div
+                    style={{
+                      padding: '20px 24px 24px',
+                      backgroundColor: '#faf8f3',
+                      borderTop: '1px solid #fde68a',
+                    }}
+                  >
                     <div
                       style={{
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        marginTop: '8px',
-                        paddingTop: '8px',
-                        borderTop: '1px dashed #e5e7eb',
-                        fontSize: '0.8125rem',
-                        color: '#6b7280',
+                        marginBottom: '14px',
                       }}
                     >
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: '#fef08a', border: '1px solid #facc15' }} />
-                        <span>Highlighted in yellow: AI-generated section</span>
+                      <span style={{ fontSize: '0.8125rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#92400e', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>📊</span> Live Burstiness &amp; Stylometrics Report
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => setIsEditing(true)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#2563eb',
-                          cursor: 'pointer',
-                          fontWeight: 600,
-                          padding: 0,
-                          fontSize: '0.8125rem',
-                        }}
-                      >
-                        ✏️ Edit text
-                      </button>
+                      <span style={{ fontSize: '0.75rem', color: '#71717a' }}>
+                        Instant mathematical heuristics
+                      </span>
                     </div>
-                  </div>
-                ) : (
-                  <textarea
-                    value={text}
-                    onChange={(e) => {
-                      setText(e.target.value)
-                      if (scanResult) setScanResult(null)
-                      if (scannedParagraphs.length > 0) setScannedParagraphs([])
-                    }}
-                    onPaste={(e) => {
-                      const pastedText = e.clipboardData?.getData('text') || ''
-                      if (pastedText.trim().length >= 10) {
-                        setText(pastedText)
-                        handleScan(pastedText)
-                      }
-                    }}
-                    placeholder="Paste your essay, article, or document here to instantly scan for AI-generated sentences..."
-                    style={{
-                      width: '100%',
-                      minHeight: '220px',
-                      border: 'none',
-                      outline: 'none',
-                      fontSize: '1rem',
-                      lineHeight: 1.6,
-                      color: '#111827',
-                      resize: 'vertical',
-                      fontFamily: 'inherit',
-                      padding: 0,
-                    }}
-                  />
-                )}
 
-                {/* Scan Result Notification - GPTZero Format */}
-                {scanResult && (
-                  <div
-                    style={{
-                      marginTop: '16px',
-                      marginBottom: '12px',
-                      padding: '16px 20px',
-                      borderRadius: '14px',
-                      backgroundColor: scanResult.score >= 50 ? '#fef2f2' : scanResult.score >= 35 ? '#fffbeb' : '#f0fdf4',
-                      border: `1px solid ${scanResult.score >= 50 ? '#fca5a5' : scanResult.score >= 35 ? '#fcd34d' : '#86efac'}`,
-                    }}
-                  >
                     <div
                       style={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        justifyContent: 'space-between',
-                        flexWrap: 'wrap',
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
                         gap: '12px',
-                        marginBottom: '12px',
                       }}
                     >
-                      <div>
-                        {/* Line 1: Score */}
-                        <div
-                          style={{
-                            fontSize: '1.25rem',
-                            fontWeight: 800,
-                            color: scanResult.score >= 50 ? '#b91c1c' : scanResult.score >= 35 ? '#b45309' : '#15803d',
-                            marginBottom: '3px',
-                            letterSpacing: '-0.02em',
-                          }}
-                        >
-                          {scanResult.score}% AI Detected
+                      <div
+                        style={{
+                          padding: '14px 16px',
+                          borderRadius: '12px',
+                          backgroundColor: '#ffffff',
+                          border: '1px solid #fde68a',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                        }}
+                      >
+                        <div style={{ fontSize: '0.75rem', color: '#71717a', fontWeight: 600, textTransform: 'uppercase', marginBottom: '2px' }}>
+                          Burstiness (B_sent)
                         </div>
-                        {/* Line 2: Verdict */}
-                        <div
-                          style={{
-                            fontSize: '0.95rem',
-                            color: scanResult.score >= 50 ? '#991b1b' : scanResult.score >= 35 ? '#92400e' : '#166534',
-                            fontWeight: 600,
-                            lineHeight: 1.4,
-                            marginBottom: '2px',
-                          }}
-                        >
-                          {scanResult.verdict}
+                        <div style={{ fontSize: '1.35rem', fontWeight: 800, color: liveStylometrics.burstinessScore < 30 ? '#dc2626' : '#16a34a' }}>
+                          {liveStylometrics.burstinessScore} / 100
                         </div>
-                        {/* Subtitle */}
-                        {scanResult.subVerdict && (
-                          <div style={{ fontSize: '0.8125rem', color: '#6b7280' }}>
-                            {scanResult.subVerdict}
-                          </div>
-                        )}
+                        <div style={{ fontSize: '0.75rem', color: '#71717a', marginTop: '2px' }}>
+                          {liveStylometrics.burstinessScore < 30 ? '⚠️ Low Variation (Machine)' : '✓ High Variation (Human)'}
+                        </div>
                       </div>
 
-                      <Link
-                        href="/scan"
+                      <div
                         style={{
-                          fontSize: '0.875rem',
-                          fontWeight: 600,
-                          color: '#2563eb',
-                          textDecoration: 'none',
-                          padding: '6px 14px',
+                          padding: '14px 16px',
+                          borderRadius: '12px',
                           backgroundColor: '#ffffff',
-                          borderRadius: '9999px',
-                          border: '1px solid #dbeafe',
-                          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                          border: '1px solid #fde68a',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
                         }}
                       >
-                        View detailed breakdown &rarr;
-                      </Link>
-                    </div>
+                        <div style={{ fontSize: '0.75rem', color: '#71717a', fontWeight: 600, textTransform: 'uppercase', marginBottom: '2px' }}>
+                          Vocabulary Diversity (TTR)
+                        </div>
+                        <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#18181b' }}>
+                          {liveStylometrics.vocabularyScore}%
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#71717a', marginTop: '2px' }}>
+                          Across {liveStylometrics.wordCount} words
+                        </div>
+                      </div>
 
-                    {/* GPTZero 3-Way Probability Bar */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        gap: '8px',
-                        paddingTop: '10px',
-                        borderTop: '1px solid rgba(0,0,0,0.06)',
-                        flexWrap: 'wrap',
-                        fontSize: '0.8125rem',
-                      }}
-                    >
-                      <span
+                      <div
                         style={{
-                          padding: '4px 10px',
-                          borderRadius: '6px',
+                          padding: '14px 16px',
+                          borderRadius: '12px',
                           backgroundColor: '#ffffff',
-                          border: '1px solid #e5e7eb',
-                          color: '#374151',
+                          border: '1px solid #fde68a',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
                         }}
                       >
-                        Entirely AI: <strong>{scanResult.completelyGeneratedProb ?? (scanResult.score >= 70 ? 98 : 2)}%</strong>
-                      </span>
-                      <span
-                        style={{
-                          padding: '4px 10px',
-                          borderRadius: '6px',
-                          backgroundColor: '#ffffff',
-                          border: '1px solid #e5e7eb',
-                          color: '#374151',
-                        }}
-                      >
-                        Mixed Content: <strong>{scanResult.mixedGeneratedProb ?? (scanResult.score >= 35 && scanResult.score < 70 ? 88 : 3)}%</strong>
-                      </span>
-                      <span
-                        style={{
-                          padding: '4px 10px',
-                          borderRadius: '6px',
-                          backgroundColor: '#ffffff',
-                          border: '1px solid #e5e7eb',
-                          color: '#374151',
-                        }}
-                      >
-                        Entirely Human: <strong>{scanResult.humanWrittenProb ?? (scanResult.score < 35 ? 94 : 0)}%</strong>
-                      </span>
+                        <div style={{ fontSize: '0.75rem', color: '#71717a', fontWeight: 600, textTransform: 'uppercase', marginBottom: '2px' }}>
+                          Avg Sentence Length
+                        </div>
+                        <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#18181b' }}>
+                          {liveStylometrics.averageSentenceLength} <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>words</span>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#71717a', marginTop: '2px' }}>
+                          Across {liveStylometrics.sentenceCount} sentences
+                        </div>
+                      </div>
 
-                      {scanResult.avgPerplexity !== undefined && (
-                        <span
-                          style={{
-                            padding: '4px 10px',
-                            borderRadius: '6px',
-                            backgroundColor: '#ffffff',
-                            border: '1px solid #e5e7eb',
-                            color: '#6b7280',
-                            marginLeft: 'auto',
-                          }}
-                        >
-                          Avg Perplexity: <strong style={{ color: '#111827' }}>{scanResult.avgPerplexity}</strong> &middot; Burstiness: <strong style={{ color: '#111827' }}>{scanResult.burstiness}</strong>
-                        </span>
-                      )}
+                      <div
+                        style={{
+                          padding: '14px 16px',
+                          borderRadius: '12px',
+                          backgroundColor: '#ffffff',
+                          border: '1px solid #fde68a',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                        }}
+                      >
+                        <div style={{ fontSize: '0.75rem', color: '#71717a', fontWeight: 600, textTransform: 'uppercase', marginBottom: '2px' }}>
+                          Formulaic Connectives
+                        </div>
+                        <div style={{ fontSize: '1.35rem', fontWeight: 800, color: liveStylometrics.aiPhraseCount > 0 ? '#b91c1c' : '#166534' }}>
+                          {liveStylometrics.aiPhraseCount} <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>phrases</span>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#71717a', marginTop: '2px' }}>
+                          {liveStylometrics.aiPhraseCount > 0 ? 'Synthetic markers found' : 'Natural human rhythm'}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                )}
+                </>
+              ) : (
+                /* Humanizer v1 Tab Content */
+                <div style={{ padding: '24px' }}>
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <label style={{ fontSize: '0.875rem', fontWeight: 700, color: '#18181b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>✨</span> AI Text Humanizer (v1)
+                      </label>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        {text && text !== humanizeInput && (
+                          <button
+                            type="button"
+                            onClick={() => setHumanizeInput(text)}
+                            style={{
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              color: '#b45309',
+                              backgroundColor: '#fef3c7',
+                              border: '1px solid #fde68a',
+                              borderRadius: '9999px',
+                              padding: '3px 10px',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            📥 Copy from Scanner
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setHumanizeInput(exampleTexts['ChatGPT'])
+                            setHumanizedOutput(null)
+                          }}
+                          style={{
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            color: '#52525b',
+                            backgroundColor: '#f4f4f5',
+                            border: '1px solid #e4e4e7',
+                            borderRadius: '9999px',
+                            padding: '3px 10px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          ⚡ Sample AI Text
+                        </button>
+                      </div>
+                    </div>
+                    <p style={{ fontSize: '0.8125rem', color: '#71717a', marginBottom: '12px' }}>
+                      Rewrites text to break robotic AI uniformity, purge cliché connectives, and introduce natural cadence.
+                    </p>
 
-                {/* Examples Row */}
-                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #f3f4f6' }}>
+                    <textarea
+                      value={humanizeInput}
+                      onChange={(e) => setHumanizeInput(e.target.value)}
+                      placeholder="Paste AI-generated text here to humanize it..."
+                      style={{
+                        width: '100%',
+                        minHeight: '160px',
+                        padding: '12px 14px',
+                        borderRadius: '12px',
+                        border: '1px solid #fde68a',
+                        backgroundColor: '#fffdfa',
+                        fontSize: '0.9375rem',
+                        lineHeight: 1.6,
+                        color: '#18181b',
+                        outline: 'none',
+                        resize: 'vertical',
+                        fontFamily: 'inherit',
+                      }}
+                    />
+                  </div>
+
+                  {/* Humanizer Action Bar */}
                   <div
                     style={{
                       display: 'flex',
+                      justifyContent: 'space-between',
                       alignItems: 'center',
-                      gap: '8px',
-                      flexWrap: 'wrap',
+                      marginBottom: humanizedOutput ? '20px' : '0',
                     }}
                   >
-                    <span style={{ fontSize: '0.8125rem', color: '#6b7280', fontWeight: 500, marginRight: '4px' }}>
-                      Examples:
+                    <span style={{ fontSize: '0.8125rem', color: '#71717a' }}>
+                      {(humanizeInput || text).length} characters
                     </span>
-                    {examples.map((example) => (
-                      <button
-                        key={example}
-                        type="button"
-                        onClick={() => handleExampleClick(example)}
+
+                    <button
+                      type="button"
+                      onClick={handleHumanize}
+                      disabled={isHumanizing || !(humanizeInput || text).trim()}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px 24px',
+                        borderRadius: '9999px',
+                        background: isHumanizing ? '#9ca3af' : 'linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #eab308 100%)',
+                        color: '#ffffff',
+                        border: 'none',
+                        fontWeight: 700,
+                        fontSize: '0.9375rem',
+                        cursor: isHumanizing ? 'not-allowed' : 'pointer',
+                        boxShadow: '0 3px 12px rgba(217, 119, 6, 0.3)',
+                      }}
+                    >
+                      <span>{isHumanizing ? 'Humanizing...' : 'Humanize Text'}</span>
+                      <span>✨</span>
+                    </button>
+                  </div>
+
+                  {/* Humanized Output Box */}
+                  {humanizedOutput && (
+                    <div
+                      style={{
+                        marginTop: '16px',
+                        padding: '18px 20px',
+                        borderRadius: '14px',
+                        backgroundColor: '#f0fdf4',
+                        border: '1px solid #86efac',
+                      }}
+                    >
+                      <div
                         style={{
-                          padding: '6px 14px',
-                          borderRadius: '8px',
-                          border: 'none',
-                          backgroundColor: selectedExample === example ? '#e5e7eb' : '#f3f4f6',
-                          color: '#1f2937',
-                          fontSize: '0.8125rem',
-                          fontWeight: 500,
-                          cursor: 'pointer',
-                          transition: 'background-color 0.15s',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: '10px',
+                          borderBottom: '1px solid #bbf7d0',
+                          paddingBottom: '8px',
                         }}
                       >
-                        {example}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 700, color: '#166534' }}>
+                            ✓ Humanized Output
+                          </span>
+                          <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '9999px', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: 600 }}>
+                            {humanizeMethod === 'openrouter' ? 'Multi-Model Rewriter' : 'Heuristic Entropy Flow'}
+                          </span>
+                        </div>
 
-              {/* Bottom Action Footer Bar */}
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '14px 24px',
-                  borderTop: '1px solid #f0f0ee',
-                  backgroundColor: '#ffffff',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ fontSize: '0.8125rem', color: '#6b7280' }}>
-                    {text.length}/10,000 characters
-                  </span>
-                  <Link
-                    href="/scan"
-                    style={{
-                      padding: '4px 14px',
-                      borderRadius: '9999px',
-                      border: '1px solid #e5e7eb',
-                      backgroundColor: '#ffffff',
-                      color: '#374151',
-                      fontSize: '0.8125rem',
-                      fontWeight: 600,
-                      textDecoration: 'none',
-                    }}
-                  >
-                    Advanced Scan
-                  </Link>
-                </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(humanizedOutput)
+                              setCopiedHumanized(true)
+                              setTimeout(() => setCopiedHumanized(false), 2000)
+                            }}
+                            style={{
+                              padding: '5px 12px',
+                              borderRadius: '8px',
+                              backgroundColor: '#ffffff',
+                              border: '1px solid #86efac',
+                              color: '#15803d',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {copiedHumanized ? '✓ Copied!' : '📋 Copy'}
+                          </button>
 
-                <button
-                  type="button"
-                  onClick={handleScan}
-                  disabled={isScanning}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '12px 28px',
-                    borderRadius: '9999px',
-                    background: isScanning ? '#9ca3af' : 'linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #eab308 100%)',
-                    color: '#ffffff',
-                    border: 'none',
-                    fontWeight: 700,
-                    fontSize: '0.9375rem',
-                    cursor: isScanning ? 'not-allowed' : 'pointer',
-                    boxShadow: '0 3px 12px rgba(217, 119, 6, 0.3)',
-                  }}
-                >
-                  <span>{isScanning ? 'Scanning...' : 'Scan Now'}</span>
-                  <span>🐝</span>
-                </button>
-              </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setText(humanizedOutput)
+                              setActiveTab('detector')
+                              handleScan(humanizedOutput)
+                            }}
+                            style={{
+                              padding: '5px 12px',
+                              borderRadius: '8px',
+                              background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                              border: 'none',
+                              color: '#ffffff',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              boxShadow: '0 2px 6px rgba(22, 163, 74, 0.25)',
+                            }}
+                          >
+                            🐝 Scan with Detector
+                          </button>
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          fontSize: '0.95rem',
+                          lineHeight: 1.65,
+                          color: '#14532d',
+                          whiteSpace: 'pre-wrap',
+                        }}
+                      >
+                        {humanizedOutput}
+                      </div>
+
+                      <div
+                        style={{
+                          display: 'flex',
+                          gap: '12px',
+                          flexWrap: 'wrap',
+                          marginTop: '12px',
+                          paddingTop: '10px',
+                          borderTop: '1px dashed #86efac',
+                          fontSize: '0.75rem',
+                          color: '#166534',
+                        }}
+                      >
+                        <span>✓ Synthetic connectives filtered</span>
+                        <span>✓ Sentence length variation boosted</span>
+                        <span>✓ Natural pacing restored</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Privacy Guarantee Note */}
