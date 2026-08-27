@@ -508,6 +508,17 @@ export default function Home() {
             >
               Comparison
             </Link>
+            <Link
+              href="/accuracy"
+              style={{
+                fontSize: '14px',
+                fontWeight: 600,
+                color: '#4b5563',
+                textDecoration: 'none',
+              }}
+            >
+              Accuracy (1000 Tests)
+            </Link>
             <ThemeToggle />
             {isAuthenticated ? (
               <Link
@@ -1787,6 +1798,9 @@ export default function Home() {
           </Link>
           <Link href="/settings" style={{ color: '#9ca3af', textDecoration: 'none' }}>
             Settings
+          </Link>
+          <Link href="/accuracy" style={{ color: '#9ca3af', textDecoration: 'none' }}>
+            Accuracy (1000 Tests)
           </Link>
           <Link href="/privacy" style={{ color: '#9ca3af', textDecoration: 'none' }}>
             Privacy Policy

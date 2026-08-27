@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-08-27T06:47:52.969Z",
+  "totalTests": 1000,
+  "totalPassed": 1000,
+  "totalFailed": 0,
+  "accuracyPercentage": "100.0%",
+  "falsePositiveRate": "0.0%",
+  "truePositiveRate": "100.0%",
+  "humanTests": {
+    "total": 500,
+    "passed": 500,
+    "failed": 0,
+    "avgPerplexity": "96.3",
+    "avgBurstiness": "15.6"
+  },
+  "aiTests": {
+    "total": 500,
+    "passed": 500,
+    "failed": 0,
+    "avgPerplexity": "15.2",
+    "avgBurstiness": "7.9"
+  },
+  "failedHumanTests": [],
+  "failedAiTests": []
+}

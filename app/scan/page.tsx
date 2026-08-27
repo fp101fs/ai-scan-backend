@@ -286,7 +286,10 @@ export default function ScanPage() {
 
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', position: 'relative', zIndex: 30 }}>
           <Link href="/comparison" className="btn btn-secondary btn-sm" style={{ cursor: 'pointer' }}>
-            Comparison vs GPTZero
+            Comparison
+          </Link>
+          <Link href="/accuracy" className="btn btn-secondary btn-sm" style={{ cursor: 'pointer' }}>
+            Accuracy (1000 Tests)
           </Link>
           <ThemeToggle />
           {session?.user ? (
@@ -851,6 +854,7 @@ export default function ScanPage() {
         <div style={{ display: 'flex', justifyContent: 'center', gap: 24, flexWrap: 'wrap', marginBottom: 12 }}>
           <Link href="/" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Home</Link>
           <Link href="/comparison" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Comparison</Link>
+          <Link href="/accuracy" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Accuracy Report</Link>
           <Link href="/privacy" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Privacy Policy</Link>
           <Link href="/terms" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Terms of Service</Link>
         </div>
