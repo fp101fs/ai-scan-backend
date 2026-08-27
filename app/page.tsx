@@ -43,6 +43,8 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'detector' | 'stylometrics'>('detector')
   const [selectedExample, setSelectedExample] = useState<string | null>(null)
   const [scanResult, setScanResult] = useState<{ score: number; verdict: string } | null>(null)
+  const [scannedParagraphs, setScannedParagraphs] = useState<{ text: string; score: number; isAi: boolean }[]>([])
+  const [isEditing, setIsEditing] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const pricingTiers: PricingTier[] = [
@@ -210,6 +212,7 @@ export default function Home() {
 
     setIsScanning(true)
     setScanResult(null)
+    setScannedParagraphs([])
 
     try {
       const payloadParagraphs = rawParagraphs.map((p, i) => ({
@@ -250,25 +253,39 @@ export default function Home() {
             verdict = 'Likely Human-Written'
           }
 
+          const parsedList = data.map((p: any) => ({
+            text: p.text || '',
+            score: Math.round((p.aiProbability ?? 0) * 100),
+            isAi: (p.aiProbability ?? 0) >= 0.5,
+          }))
+
+          setScannedParagraphs(parsedList)
+          setIsEditing(false)
           setScanResult({ score, verdict })
         } else {
           setScanResult({ score: 18, verdict: 'Likely Human-Written' })
+          setScannedParagraphs([{ text, score: 18, isAi: false }])
+          setIsEditing(false)
         }
       } else {
         const isAi = /furthermore|moreover|in conclusion|testament to|seamlessly|multifaceted/i.test(text)
         const score = isAi ? 88 : 12
         setScanResult({
           score,
-          verdict: score >= 50 ? 'Likely AI-Generated' : 'Likely Human-Written',
+          verdict: score >= 50 ? 'Contains AI-Generated Content (1 of 1 sections flagged as AI)' : 'Likely Human-Written',
         })
+        setScannedParagraphs([{ text, score, isAi }])
+        setIsEditing(false)
       }
     } catch {
       const isAi = /furthermore|moreover|in conclusion|testament to|seamlessly|multifaceted/i.test(text)
       const score = isAi ? 85 : 15
       setScanResult({
         score,
-        verdict: score >= 50 ? 'Likely AI-Generated' : 'Likely Human-Written',
+        verdict: score >= 50 ? 'Contains AI-Generated Content (1 of 1 sections flagged as AI)' : 'Likely Human-Written',
       })
+      setScannedParagraphs([{ text, score, isAi }])
+      setIsEditing(false)
     } finally {
       setIsScanning(false)
     }
@@ -281,6 +298,8 @@ export default function Home() {
       reader.onload = (e) => {
         setText((e.target?.result as string) || '')
         setScanResult(null)
+        setScannedParagraphs([])
+        setIsEditing(true)
       }
       reader.readAsText(file)
     }
@@ -289,6 +308,8 @@ export default function Home() {
   const handleExampleClick = (example: string) => {
     setSelectedExample(example)
     setScanResult(null)
+    setScannedParagraphs([])
+    setIsEditing(true)
     if (exampleTexts[example]) {
       setText(exampleTexts[example])
     } else {
@@ -782,61 +803,153 @@ export default function Home() {
                   </button>
                 </div>
 
-                <textarea
-                  value={text}
-                  onChange={(e) => {
-                    setText(e.target.value)
-                    if (scanResult) setScanResult(null)
-                  }}
-                  placeholder="Paste your essay, article, or document here to check for AI-generated sentences..."
-                  style={{
-                    width: '100%',
-                    minHeight: '220px',
-                    border: 'none',
-                    outline: 'none',
-                    fontSize: '1rem',
-                    lineHeight: 1.6,
-                    color: '#111827',
-                    resize: 'vertical',
-                    fontFamily: 'inherit',
-                    padding: 0,
-                  }}
-                />
+                {/* Input Area: Shows interactive yellow highlights after scan, or textarea when editing */}
+                {scanResult && scannedParagraphs.length > 0 && !isEditing ? (
+                  <div>
+                    <div
+                      onClick={() => setIsEditing(true)}
+                      title="Click anywhere to edit text"
+                      style={{
+                        width: '100%',
+                        minHeight: '220px',
+                        fontSize: '1rem',
+                        lineHeight: 1.65,
+                        color: '#111827',
+                        fontFamily: 'inherit',
+                        padding: '4px 0',
+                        whiteSpace: 'pre-wrap',
+                        cursor: 'text',
+                      }}
+                    >
+                      {scannedParagraphs.map((p, idx) => (
+                        <p key={idx} style={{ marginBottom: idx < scannedParagraphs.length - 1 ? '1.1em' : 0 }}>
+                          <span
+                            style={{
+                              backgroundColor: p.isAi ? '#fef08a' : 'transparent',
+                              color: p.isAi ? '#1f2937' : 'inherit',
+                              padding: p.isAi ? '3px 6px' : '0',
+                              borderRadius: p.isAi ? '4px' : '0',
+                              boxDecorationBreak: 'clone',
+                              WebkitBoxDecorationBreak: 'clone',
+                            }}
+                          >
+                            {p.text}
+                          </span>
+                        </p>
+                      ))}
+                    </div>
 
-                {/* Scan Result Notification */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginTop: '8px',
+                        paddingTop: '8px',
+                        borderTop: '1px dashed #e5e7eb',
+                        fontSize: '0.8125rem',
+                        color: '#6b7280',
+                      }}
+                    >
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: '#fef08a', border: '1px solid #facc15' }} />
+                        <span>Highlighted in yellow: AI-generated section</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsEditing(true)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#2563eb',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          padding: 0,
+                          fontSize: '0.8125rem',
+                        }}
+                      >
+                        ✏️ Edit text
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <textarea
+                    value={text}
+                    onChange={(e) => {
+                      setText(e.target.value)
+                      if (scanResult) setScanResult(null)
+                      if (scannedParagraphs.length > 0) setScannedParagraphs([])
+                    }}
+                    placeholder="Paste your essay, article, or document here to check for AI-generated sentences..."
+                    style={{
+                      width: '100%',
+                      minHeight: '220px',
+                      border: 'none',
+                      outline: 'none',
+                      fontSize: '1rem',
+                      lineHeight: 1.6,
+                      color: '#111827',
+                      resize: 'vertical',
+                      fontFamily: 'inherit',
+                      padding: 0,
+                    }}
+                  />
+                )}
+
+                {/* Scan Result Notification - Split into 2 lines */}
                 {scanResult && (
                   <div
                     style={{
-                      marginTop: '12px',
+                      marginTop: '16px',
                       marginBottom: '12px',
-                      padding: '12px 16px',
-                      borderRadius: '10px',
+                      padding: '14px 18px',
+                      borderRadius: '12px',
                       backgroundColor: scanResult.score >= 50 ? '#fef2f2' : '#f0fdf4',
                       border: `1px solid ${scanResult.score >= 50 ? '#fca5a5' : '#86efac'}`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       flexWrap: 'wrap',
-                      gap: '8px',
+                      gap: '12px',
                     }}
                   >
                     <div>
-                      <strong
+                      {/* Line 1: Score */}
+                      <div
                         style={{
-                          fontSize: '0.95rem',
+                          fontSize: '1.2rem',
+                          fontWeight: 800,
                           color: scanResult.score >= 50 ? '#b91c1c' : '#15803d',
+                          marginBottom: '4px',
+                          letterSpacing: '-0.02em',
                         }}
                       >
-                        {scanResult.score}% AI Detected &middot; {scanResult.verdict}
-                      </strong>
+                        {scanResult.score}% AI Detected
+                      </div>
+                      {/* Line 2: Verdict */}
+                      <div
+                        style={{
+                          fontSize: '0.925rem',
+                          color: scanResult.score >= 50 ? '#991b1b' : '#166534',
+                          fontWeight: 500,
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {scanResult.verdict}
+                      </div>
                     </div>
                     <Link
                       href="/scan"
                       style={{
-                        fontSize: '0.8125rem',
+                        fontSize: '0.875rem',
                         fontWeight: 600,
                         color: '#2563eb',
                         textDecoration: 'none',
+                        padding: '6px 14px',
+                        backgroundColor: '#ffffff',
+                        borderRadius: '9999px',
+                        border: '1px solid #dbeafe',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
                       }}
                     >
                       View sentence breakdown &rarr;
