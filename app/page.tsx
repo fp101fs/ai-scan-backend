@@ -236,12 +236,16 @@ export default function Home() {
             0
           )
           const score = Math.round(totalScore / data.length)
+          const maxScore = Math.max(...data.map((p: any) => Math.round((p.aiProbability ?? 0) * 100)), 0)
+          const aiFlaggedCount = data.filter((p: any) => (p.aiProbability ?? 0) >= 0.5).length
 
           let verdict = 'Likely Human-Written'
-          if (score >= 70) {
-            verdict = 'Likely Entirely AI-Generated'
-          } else if (score >= 45) {
-            verdict = 'Mixed AI & Human Content'
+          if (aiFlaggedCount === data.length && score >= 70) {
+            verdict = 'Entirely AI-Generated (100% of sections flagged)'
+          } else if (aiFlaggedCount > 0 || maxScore >= 70) {
+            verdict = `Contains AI-Generated Content (${aiFlaggedCount} of ${data.length} sections flagged as AI)`
+          } else if (score >= 35) {
+            verdict = 'Moderate AI / Mixed patterns'
           } else {
             verdict = 'Likely Human-Written'
           }

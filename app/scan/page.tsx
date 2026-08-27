@@ -184,6 +184,8 @@ export default function ScanPage() {
         const totalScore = parsedParagraphs.reduce((acc, p) => acc + p.score, 0)
         const overallScore = parsedParagraphs.length > 0 ? Math.round(totalScore / parsedParagraphs.length) : 0
         const humanScore = 100 - overallScore
+        const maxScore = Math.max(...parsedParagraphs.map((p) => p.score), 0)
+        const aiFlaggedCount = parsedParagraphs.filter((p) => p.score >= 50).length
 
         const avgPerp = Math.round(
           parsedParagraphs.reduce((acc, p) => acc + (p.perplexityScore || 0), 0) / (parsedParagraphs.length || 1)
@@ -196,10 +198,12 @@ export default function ScanPage() {
         )
 
         let verdict = 'Likely Human-Written'
-        if (overallScore >= 70) {
-          verdict = 'Your text is likely entirely AI-generated'
-        } else if (overallScore >= 45) {
-          verdict = 'Your text contains mixed AI & human content'
+        if (aiFlaggedCount === parsedParagraphs.length && overallScore >= 70) {
+          verdict = 'Your text is entirely AI-generated (100% AI sections)'
+        } else if (aiFlaggedCount > 0 || maxScore >= 70) {
+          verdict = `Contains AI-Generated Content (${aiFlaggedCount} of ${parsedParagraphs.length} sections flagged as AI)`
+        } else if (overallScore >= 35) {
+          verdict = 'Your text contains moderate AI / mixed patterns'
         } else {
           verdict = 'Your text is likely written by a human'
         }
