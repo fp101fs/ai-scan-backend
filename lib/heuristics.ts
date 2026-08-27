@@ -22,6 +22,15 @@
  *    Scans for passive constructions and formulaic AI transition markers.
  */
 
+export interface SentenceAnalysis {
+  text: string;
+  score: number;
+  isAi: boolean;
+  wordCount: number;
+  aiPhraseMatches: string[];
+  hasPassive: boolean;
+}
+
 export interface HeuristicAnalysis {
   perplexityScore: number;
   burstinessScore: number;
@@ -36,6 +45,7 @@ export interface HeuristicAnalysis {
   aiPhraseCount: number;
   passiveVoiceCount: number;
   trigramRepetition: number;
+  sentences: SentenceAnalysis[];
 }
 
 const AI_PHRASES = [
@@ -80,6 +90,7 @@ export function analyzeHeuristics(text: string): HeuristicAnalysis {
       aiPhraseCount: 0,
       passiveVoiceCount: 0,
       trigramRepetition: 0,
+      sentences: [],
     };
   }
 
@@ -169,6 +180,42 @@ export function analyzeHeuristics(text: string): HeuristicAnalysis {
 
   const aiProbability = Math.round((1.0 / (1.0 + Math.exp(-rawLogit))) * 100) / 100;
 
+  // 8. Sentence-level granular breakdown
+  const sentenceAnalyses: SentenceAnalysis[] = sentences.map((s) => {
+    const sWords = s.match(/\b[a-z0-9'-]+\b/g) || [];
+    const sWordCount = Math.max(1, sWords.length);
+
+    const foundPhrases: string[] = [];
+    for (const regex of AI_PHRASES) {
+      const match = s.match(regex);
+      if (match) foundPhrases.push(...match);
+    }
+
+    const hasPassive = PASSIVE_REGEX.test(s);
+    let sAiProb = aiProbability;
+
+    if (foundPhrases.length > 0) {
+      sAiProb = Math.min(0.99, Math.max(0.75, sAiProb + 0.25 * foundPhrases.length));
+    }
+    if (hasPassive && sAiProb > 0.4) {
+      sAiProb = Math.min(0.98, sAiProb + 0.08);
+    }
+    if (sWordCount < 15 && foundPhrases.length === 0 && aiProbability < 0.45) {
+      sAiProb = Math.max(0.02, sAiProb - 0.15);
+    }
+
+    const sScore = Math.round(sAiProb * 100);
+
+    return {
+      text: s,
+      score: sScore,
+      isAi: sScore >= 50,
+      wordCount: sWordCount,
+      aiPhraseMatches: foundPhrases,
+      hasPassive,
+    };
+  });
+
   return {
     perplexityScore: Math.round((1 - vocabUniformity) * 100),
     burstinessScore: Math.round((b_comp + 1) * 50), // Map [-1, 1] to [0, 100]
@@ -183,5 +230,6 @@ export function analyzeHeuristics(text: string): HeuristicAnalysis {
     aiPhraseCount: aiPhraseMatches,
     passiveVoiceCount: passiveMatches.length,
     trigramRepetition: Math.round(trigramRepetition * 100) / 100,
+    sentences: sentenceAnalyses,
   };
 }

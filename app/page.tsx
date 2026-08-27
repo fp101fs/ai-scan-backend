@@ -43,7 +43,14 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'detector' | 'stylometrics'>('detector')
   const [selectedExample, setSelectedExample] = useState<string | null>(null)
   const [scanResult, setScanResult] = useState<{ score: number; verdict: string } | null>(null)
-  const [scannedParagraphs, setScannedParagraphs] = useState<{ text: string; score: number; isAi: boolean }[]>([])
+  const [scannedParagraphs, setScannedParagraphs] = useState<
+    {
+      text: string
+      score: number
+      isAi: boolean
+      sentences?: { text: string; score: number; isAi: boolean }[]
+    }[]
+  >([])
   const [isEditing, setIsEditing] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -253,11 +260,35 @@ export default function Home() {
             verdict = 'Likely Human-Written'
           }
 
-          const parsedList = data.map((p: any) => ({
-            text: p.text || '',
-            score: Math.round((p.aiProbability ?? 0) * 100),
-            isAi: (p.aiProbability ?? 0) >= 0.5,
-          }))
+          const parsedList = data.map((p: any) => {
+            const pText = p.text || ''
+            const pScore = Math.round((p.aiProbability ?? 0) * 100)
+            
+            let sents = p.sentences
+            if (!sents || sents.length === 0) {
+              const rawSents = pText.split(/(?<=[.!?])\s+(?=[A-Z0-9"'])/).filter(Boolean)
+              sents = (rawSents.length > 0 ? rawSents : [pText]).map((st: string) => {
+                const isCliché = /furthermore|moreover|in conclusion|it is important to note|delve|testament to|tapestry|seamlessly/i.test(st)
+                const sScore = isCliché ? Math.min(100, Math.max(85, pScore + 20)) : pScore
+                return {
+                  text: st,
+                  score: sScore,
+                  isAi: sScore >= 50,
+                }
+              })
+            }
+
+            return {
+              text: pText,
+              score: pScore,
+              isAi: pScore >= 50,
+              sentences: sents.map((s: any) => ({
+                text: s.text,
+                score: s.score ?? pScore,
+                isAi: Boolean((s.isAi ?? (s.score >= 50)) || ((s.score ?? pScore) >= 50)),
+              })),
+            }
+          })
 
           setScannedParagraphs(parsedList)
           setIsEditing(false)
@@ -821,20 +852,41 @@ export default function Home() {
                         cursor: 'text',
                       }}
                     >
-                      {scannedParagraphs.map((p, idx) => (
-                        <p key={idx} style={{ marginBottom: idx < scannedParagraphs.length - 1 ? '1.1em' : 0 }}>
-                          <span
-                            style={{
-                              backgroundColor: p.isAi ? '#fef08a' : 'transparent',
-                              color: p.isAi ? '#1f2937' : 'inherit',
-                              padding: p.isAi ? '3px 6px' : '0',
-                              borderRadius: p.isAi ? '4px' : '0',
-                              boxDecorationBreak: 'clone',
-                              WebkitBoxDecorationBreak: 'clone',
-                            }}
-                          >
-                            {p.text}
-                          </span>
+                      {scannedParagraphs.map((p, pIdx) => (
+                        <p key={pIdx} style={{ marginBottom: pIdx < scannedParagraphs.length - 1 ? '1.1em' : 0 }}>
+                          {p.sentences && p.sentences.length > 0 ? (
+                            p.sentences.map((s, sIdx) => (
+                              <span
+                                key={sIdx}
+                                style={{
+                                  backgroundColor: s.isAi ? '#fef08a' : 'transparent',
+                                  color: s.isAi ? '#1f2937' : 'inherit',
+                                  padding: s.isAi ? '2px 4px' : '0',
+                                  marginRight: '2px',
+                                  borderRadius: s.isAi ? '4px' : '0',
+                                  boxDecorationBreak: 'clone',
+                                  WebkitBoxDecorationBreak: 'clone',
+                                  fontWeight: s.isAi ? 500 : 'normal',
+                                }}
+                                title={`Sentence AI Score: ${s.score}%`}
+                              >
+                                {s.text}{' '}
+                              </span>
+                            ))
+                          ) : (
+                            <span
+                              style={{
+                                backgroundColor: p.isAi ? '#fef08a' : 'transparent',
+                                color: p.isAi ? '#1f2937' : 'inherit',
+                                padding: p.isAi ? '2px 4px' : '0',
+                                borderRadius: p.isAi ? '4px' : '0',
+                                boxDecorationBreak: 'clone',
+                                WebkitBoxDecorationBreak: 'clone',
+                              }}
+                            >
+                              {p.text}
+                            </span>
+                          )}
                         </p>
                       ))}
                     </div>

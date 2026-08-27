@@ -114,6 +114,7 @@ export async function POST(req: NextRequest) {
         burstinessScore: heuristicStats.burstinessScore,
         vocabularyScore: heuristicStats.vocabularyScore,
         method: usedMethod,
+        sentences: heuristicStats.sentences || [],
       });
     }
 
