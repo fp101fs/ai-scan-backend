@@ -200,35 +200,52 @@ export default function Home() {
       alert('Please enter at least 10 characters to scan.')
       return
     }
+
+    const rawParagraphs = text
+      .split(/\n\s*\n/)
+      .map((p) => p.trim())
+      .filter(Boolean)
+
+    if (rawParagraphs.length === 0) return
+
     setIsScanning(true)
     setScanResult(null)
 
     try {
+      const payloadParagraphs = rawParagraphs.map((p, i) => ({
+        index: i,
+        text: p,
+        wordCount: p.trim().split(/\s+/).filter(Boolean).length,
+      }))
+
       const res = await fetch('/api/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          paragraphs: [
-            {
-              index: 0,
-              text: text,
-              wordCount: text.trim().split(/\s+/).filter(Boolean).length,
-            },
-          ],
-          mode: 'heuristic',
+          paragraphs: payloadParagraphs,
+          mode: 'hybrid',
+          model: 'openai/gpt-4o-mini',
         }),
       })
 
       if (res.ok) {
         const data = await res.json()
-        if (Array.isArray(data) && data[0]) {
-          const score = Math.round((data[0].aiProbability ?? 0) * 100)
+        if (Array.isArray(data) && data.length > 0) {
+          const totalScore = data.reduce(
+            (acc: number, p: any) => acc + Math.round((p.aiProbability ?? 0) * 100),
+            0
+          )
+          const score = Math.round(totalScore / data.length)
+
           let verdict = 'Likely Human-Written'
           if (score >= 70) {
             verdict = 'Likely Entirely AI-Generated'
-          } else if (score >= 40) {
+          } else if (score >= 45) {
             verdict = 'Mixed AI & Human Content'
+          } else {
+            verdict = 'Likely Human-Written'
           }
+
           setScanResult({ score, verdict })
         } else {
           setScanResult({ score: 18, verdict: 'Likely Human-Written' })
