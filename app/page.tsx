@@ -1549,8 +1549,8 @@ export default function Home() {
                           <span style={{ fontSize: '13px', fontWeight: 700, color: '#166534' }}>
                             ✓ Humanized Output
                           </span>
-                          <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '9999px', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: 600 }}>
-                            {humanizeMethod === 'openrouter' ? 'DeepSeek V4 Flash' : 'Heuristic Entropy Flow'}
+                          <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '9999px', backgroundColor: humanizeMethod === 'openrouter' ? '#dcfce7' : '#fef3c7', color: humanizeMethod === 'openrouter' ? '#15803d' : '#92400e', fontWeight: 600 }}>
+                            {humanizeMethod === 'openrouter' ? '⚡ DeepSeek V4 Flash (OpenRouter)' : '🌀 Heuristic Flow'}
                           </span>
                         </div>
 

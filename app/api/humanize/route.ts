@@ -18,13 +18,14 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   try {
-    let effectiveApiKey: string | undefined = process.env.OPENROUTER_API_KEY;
+    // 1. Prioritize Server Environment API Key
+    const envApiKey = process.env.OPENROUTER_API_KEY;
     const customKeyHeader = req.headers.get("x-openrouter-key");
     const authHeader = req.headers.get("authorization");
 
-    if (customKeyHeader) {
-      effectiveApiKey = customKeyHeader;
-    } else {
+    let effectiveApiKey: string | undefined = envApiKey || customKeyHeader || undefined;
+
+    if (!effectiveApiKey) {
       try {
         const session = await getServerSession(authOptions);
         const sessionUser = session?.user as any;
@@ -63,12 +64,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (effectiveApiKey) {
+    // 2. Execute with OpenRouter DeepSeek if API key is present
+    if (effectiveApiKey && effectiveApiKey.trim().length > 0) {
       try {
         const res = await fetch(OPENROUTER_URL, {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${effectiveApiKey}`,
+            Authorization: `Bearer ${effectiveApiKey.trim()}`,
             "Content-Type": "application/json",
             "HTTP-Referer": process.env.NEXTAUTH_URL || "https://aidetector.buzz",
             "X-Title": "AIDetector.buzz Humanizer",
@@ -173,18 +175,22 @@ CRITICAL: Return ONLY the final rewritten text without preambles, introductory c
               { headers: corsHeaders }
             );
           }
+        } else {
+          const errBody = await res.text();
+          console.error("OpenRouter Humanize API failed:", res.status, errBody);
         }
-      } catch (err) {
-        console.warn("OpenRouter humanize failed, using fallback:", err);
+      } catch (err: any) {
+        console.error("OpenRouter fetch error:", err.message);
       }
     }
 
-    // Heuristic Humanizer fallback
+    // 3. Fallback to advanced heuristic rewrite
     const fallbackText = advancedHeuristicHumanize(text);
     return NextResponse.json(
       {
         humanizedText: fallbackText,
         method: "heuristic",
+        note: !effectiveApiKey ? "No OpenRouter API key found in env var" : "OpenRouter call failed, used fallback",
       },
       { headers: corsHeaders }
     );
